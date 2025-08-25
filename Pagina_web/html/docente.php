@@ -1,0 +1,479 @@
+[⚠️ Suspicious Content] <!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Docente - Portal Universitario</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="docente-styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <div class="header-left">
+                <div class="logo">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5z"/>
+                    </svg>
+                    <h1 class="font-playfair">Portal Docente</h1>
+                </div>
+            </div>
+            <div class="header-right">
+                <div class="user-info">
+                    <img src="/placeholder.svg?height=40&width=40" alt="Foto de perfil" class="profile-img">
+                    <div class="user-details">
+                        <span class="user-name">Dra. María González</span>
+                        <span class="user-role">Docente - Matemáticas</span>
+                    </div>
+                </div>
+                <a href="index.php" class="btn-secondary">Cerrar Sesión</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container">
+            <!-- Welcome Section -->
+            <div class="welcome-section">
+                <h2 class="welcome-title">Bienvenida, Dra. González</h2>
+                <p class="welcome-subtitle">Gestione sus cursos, estudiantes y calificaciones desde aquí</p>
+            </div>
+
+            <!-- Navigation Tabs -->
+            <div class="tabs-container">
+                <div class="tabs-nav">
+                    <button class="tab-btn active" onclick="showTab('materias')">Mis Materias</button>
+                    <button class="tab-btn" onclick="showTab('calificaciones')">Calificaciones</button>
+                    <button class="tab-btn" onclick="showTab('horarios')">Horarios</button>
+                    <button class="tab-btn" onclick="showTab('estudiantes')">Estudiantes</button>
+                    <button class="tab-btn" onclick="showTab('mensajes')">Mensajes</button>
+                    <button class="tab-btn" onclick="showTab('reportes')">Reportes</button>
+                </div>
+
+                <!-- Tab Content: Mis Materias -->
+                <div id="materias" class="tab-content active">
+                    <div class="section-header">
+                        <h3>Materias Asignadas</h3>
+                        <p>Gestione las materias que tiene a su cargo este semestre</p>
+                    </div>
+                    
+                    <div class="cards-grid">
+                        <div class="subject-card">
+                            <div class="subject-header">
+                                <h4>Cálculo Diferencial</h4>
+                                <span class="subject-code">MAT-101</span>
+                            </div>
+                            <div class="subject-info">
+                                <p><strong>Estudiantes:</strong> 45</p>
+                                <p><strong>Créditos:</strong> 4</p>
+                                <p><strong>Aula:</strong> A-205</p>
+                            </div>
+                            <div class="subject-actions">
+                                <button class="btn-primary" onclick="viewStudents('MAT-101')">Ver Estudiantes</button>
+                                <button class="btn-secondary" onclick="viewGrades('MAT-101')">Calificaciones</button>
+                            </div>
+                        </div>
+
+                        <div class="subject-card">
+                            <div class="subject-header">
+                                <h4>Álgebra Lineal</h4>
+                                <span class="subject-code">MAT-201</span>
+                            </div>
+                            <div class="subject-info">
+                                <p><strong>Estudiantes:</strong> 38</p>
+                                <p><strong>Créditos:</strong> 3</p>
+                                <p><strong>Aula:</strong> B-102</p>
+                            </div>
+                            <div class="subject-actions">
+                                <button class="btn-primary" onclick="viewStudents('MAT-201')">Ver Estudiantes</button>
+                                <button class="btn-secondary" onclick="viewGrades('MAT-201')">Calificaciones</button>
+                            </div>
+                        </div>
+
+                        <div class="subject-card">
+                            <div class="subject-header">
+                                <h4>Estadística Aplicada</h4>
+                                <span class="subject-code">EST-301</span>
+                            </div>
+                            <div class="subject-info">
+                                <p><strong>Estudiantes:</strong> 32</p>
+                                <p><strong>Créditos:</strong> 3</p>
+                                <p><strong>Aula:</strong> C-301</p>
+                            </div>
+                            <div class="subject-actions">
+                                <button class="btn-primary" onclick="viewStudents('EST-301')">Ver Estudiantes</button>
+                                <button class="btn-secondary" onclick="viewGrades('EST-301')">Calificaciones</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab Content: Calificaciones -->
+                <div id="calificaciones" class="tab-content">
+                    <div class="section-header">
+                        <h3>Gestión de Calificaciones</h3>
+                        <p>Ingrese y modifique las calificaciones de sus estudiantes</p>
+                    </div>
+
+                    <div class="grade-selector">
+                        <label for="subject-select">Seleccionar Materia:</label>
+                        <select id="subject-select" onchange="loadGrades()">
+                            <option value="MAT-101">Cálculo Diferencial (MAT-101)</option>
+                            <option value="MAT-201">Álgebra Lineal (MAT-201)</option>
+                            <option value="EST-301">Estadística Aplicada (EST-301)</option>
+                        </select>
+                    </div>
+
+                    <div class="grades-table-container">
+                        <table class="grades-table">
+                            <thead>
+                                <tr>
+                                    <th>Estudiante</th>
+                                    <th>Código</th>
+                                    <th>Parcial 1</th>
+                                    <th>Parcial 2</th>
+                                    <th>Parcial 3</th>
+                                    <th>Final</th>
+                                    <th>Promedio</th>
+                                    <th>Estado</th>
+                                </tr>
+                            </thead>
+                            <tbody id="grades-tbody">
+                                <tr>
+                                    <td>Ana Rodríguez</td>
+                                    <td>2021001</td>
+                                    <td><input type="number" value="85" min="0" max="100" onchange="calculateAverage(this)"></td>
+                                    <td><input type="number" value="78" min="0" max="100" onchange="calculateAverage(this)"></td>
+                                    <td><input type="number" value="92" min="0" max="100" onchange="calculateAverage(this)"></td>
+                                    <td><input type="number" value="88" min="0" max="100" onchange="calculateAverage(this)"></td>
+                                    <td class="average">85.8</td>
+                                    <td><span class="status approved">Aprobado</span></td>
+                                </tr>
+                                <tr>
+                                    <td>Carlos Mendoza</td>
+                                    <td>2021002</td>
+                                    <td><input type="number" value="72" min="0" max="100" onchange="calculateAverage(this)"></td>
+                                    <td><input type="number" value="68" min="0" max="100" onchange="calculateAverage(this)"></td>
+                                    <td><input type="number" value="75" min="0" max="100" onchange="calculateAverage(this)"></td>
+                                    <td><input type="number" value="70" min="0" max="100" onchange="calculateAverage(this)"></td>
+                                    <td class="average">71.3</td>
+                                    <td><span class="status approved">Aprobado</span></td>
+                                </tr>
+                                <tr>
+                                    <td>Laura Jiménez</td>
+                                    <td>2021003</td>
+                                    <td><input type="number" value="95" min="0" max="100" onchange="calculateAverage(this)"></td>
+                                    <td><input type="number" value="89" min="0" max="100" onchange="calculateAverage(this)"></td>
+                                    <td><input type="number" value="93" min="0" max="100" onchange="calculateAverage(this)"></td>
+                                    <td><input type="number" value="91" min="0" max="100" onchange="calculateAverage(this)"></td>
+                                    <td class="average">92.0</td>
+                                    <td><span class="status approved">Aprobado</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="grade-actions">
+                        <button class="btn-primary" onclick="saveGrades()">Guardar Calificaciones</button>
+                        <button class="btn-secondary" onclick="exportGrades()">Exportar a Excel</button>
+                    </div>
+                </div>
+
+                <!-- Tab Content: Horarios -->
+                <div id="horarios" class="tab-content">
+                    <div class="section-header">
+                        <h3>Horario de Clases</h3>
+                        <p>Su horario semanal de clases asignadas</p>
+                    </div>
+
+                    <div class="schedule-container">
+                        <table class="schedule-table">
+                            <thead>
+                                <tr>
+                                    <th>Hora</th>
+                                    <th>Lunes</th>
+                                    <th>Martes</th>
+                                    <th>Miércoles</th>
+                                    <th>Jueves</th>
+                                    <th>Viernes</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="time-slot">7:00 - 8:30</td>
+                                    <td></td>
+                                    <td class="class-slot calc">
+                                        <div class="class-info">
+                                            <strong>Cálculo Diferencial</strong>
+                                            <span>MAT-101 - A-205</span>
+                                        </div>
+                                    </td>
+                                    <td></td>
+                                    <td class="class-slot calc">
+                                        <div class="class-info">
+                                            <strong>Cálculo Diferencial</strong>
+                                            <span>MAT-101 - A-205</span>
+                                        </div>
+                                    </td>
+                                    <td></td>
+                                </tr>
+                                <tr>
+                                    <td class="time-slot">8:30 - 10:00</td>
+                                    <td class="class-slot algebra">
+                                        <div class="class-info">
+                                            <strong>Álgebra Lineal</strong>
+                                            <span>MAT-201 - B-102</span>
+                                        </div>
+                                    </td>
+                                    <td></td>
+                                    <td class="class-slot algebra">
+                                        <div class="class-info">
+                                            <strong>Álgebra Lineal</strong>
+                                            <span>MAT-201 - B-102</span>
+                                        </div>
+                                    </td>
+                                    <td></td>
+                                    <td class="class-slot stats">
+                                        <div class="class-info">
+                                            <strong>Estadística</strong>
+                                            <span>EST-301 - C-301</span>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="time-slot">10:00 - 11:30</td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                </tr>
+                                <tr>
+                                    <td class="time-slot">11:30 - 13:00</td>
+                                    <td></td>
+                                    <td class="class-slot stats">
+                                        <div class="class-info">
+                                            <strong>Estadística</strong>
+                                            <span>EST-301 - C-301</span>
+                                        </div>
+                                    </td>
+                                    <td></td>
+                                    <td class="class-slot stats">
+                                        <div class="class-info">
+                                            <strong>Estadística</strong>
+                                            <span>EST-301 - C-301</span>
+                                        </div>
+                                    </td>
+                                    <td></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Tab Content: Estudiantes -->
+                <div id="estudiantes" class="tab-content">
+                    <div class="section-header">
+                        <h3>Lista de Estudiantes</h3>
+                        <p>Información de contacto y rendimiento de sus estudiantes</p>
+                    </div>
+
+                    <div class="students-filters">
+                        <select onchange="filterStudents()">
+                            <option value="all">Todas las materias</option>
+                            <option value="MAT-101">Cálculo Diferencial</option>
+                            <option value="MAT-201">Álgebra Lineal</option>
+                            <option value="EST-301">Estadística Aplicada</option>
+                        </select>
+                        <input type="text" placeholder="Buscar estudiante..." onkeyup="searchStudents(this.value)">
+                    </div>
+
+                    <div class="students-grid">
+                        <div class="student-card">
+                            <div class="student-info">
+                                <h4>Ana Rodríguez</h4>
+                                <p class="student-code">Código: 2021001</p>
+                                <p class="student-email">ana.rodriguez@universidad.edu</p>
+                                <p class="student-subjects">Materias: MAT-101, MAT-201</p>
+                            </div>
+                            <div class="student-stats">
+                                <div class="stat">
+                                    <span class="stat-label">Promedio</span>
+                                    <span class="stat-value good">85.8</span>
+                                </div>
+                                <div class="stat">
+                                    <span class="stat-label">Asistencia</span>
+                                    <span class="stat-value good">95%</span>
+                                </div>
+                            </div>
+                            <div class="student-actions">
+                                <button class="btn-secondary" onclick="sendMessage('2021001')">Mensaje</button>
+                                <button class="btn-secondary" onclick="viewProfile('2021001')">Ver Perfil</button>
+                            </div>
+                        </div>
+
+                        <div class="student-card">
+                            <div class="student-info">
+                                <h4>Carlos Mendoza</h4>
+                                <p class="student-code">Código: 2021002</p>
+                                <p class="student-email">carlos.mendoza@universidad.edu</p>
+                                <p class="student-subjects">Materias: MAT-101, EST-301</p>
+                            </div>
+                            <div class="student-stats">
+                                <div class="stat">
+                                    <span class="stat-label">Promedio</span>
+                                    <span class="stat-value average">71.3</span>
+                                </div>
+                                <div class="stat">
+                                    <span class="stat-label">Asistencia</span>
+                                    <span class="stat-value average">88%</span>
+                                </div>
+                            </div>
+                            <div class="student-actions">
+                                <button class="btn-secondary" onclick="sendMessage('2021002')">Mensaje</button>
+                                <button class="btn-secondary" onclick="viewProfile('2021002')">Ver Perfil</button>
+                            </div>
+                        </div>
+
+                        <div class="student-card">
+                            <div class="student-info">
+                                <h4>Laura Jiménez</h4>
+                                <p class="student-code">Código: 2021003</p>
+                                <p class="student-email">laura.jimenez@universidad.edu</p>
+                                <p class="student-subjects">Materias: MAT-201, EST-301</p>
+                            </div>
+                            <div class="student-stats">
+                                <div class="stat">
+                                    <span class="stat-label">Promedio</span>
+                                    <span class="stat-value excellent">92.0</span>
+                                </div>
+                                <div class="stat">
+                                    <span class="stat-label">Asistencia</span>
+                                    <span class="stat-value excellent">98%</span>
+                                </div>
+                            </div>
+                            <div class="student-actions">
+                                <button class="btn-secondary" onclick="sendMessage('2021003')">Mensaje</button>
+                                <button class="btn-secondary" onclick="viewProfile('2021003')">Ver Perfil</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab Content: Mensajes -->
+                <div id="mensajes" class="tab-content">
+                    <div class="section-header">
+                        <h3>Centro de Mensajes</h3>
+                        <p>Comunicación con estudiantes y administración</p>
+                    </div>
+
+                    <div class="messages-container">
+                        <div class="messages-sidebar">
+                            <button class="btn-primary mb-4" onclick="newMessage()">Nuevo Mensaje</button>
+                            <div class="message-filters">
+                                <button class="filter-btn active" onclick="filterMessages('all')">Todos</button>
+                                <button class="filter-btn" onclick="filterMessages('unread')">No leídos</button>
+                                <button class="filter-btn" onclick="filterMessages('sent')">Enviados</button>
+                            </div>
+                        </div>
+
+                        <div class="messages-list">
+                            <div class="message-item unread">
+                                <div class="message-header">
+                                    <strong>Ana Rodríguez</strong>
+                                    <span class="message-time">Hace 2 horas</span>
+                                </div>
+                                <div class="message-subject">Consulta sobre el examen parcial</div>
+                                <div class="message-preview">Profesora, tengo una duda sobre el tema de derivadas...</div>
+                            </div>
+
+                            <div class="message-item">
+                                <div class="message-header">
+                                    <strong>Coordinación Académica</strong>
+                                    <span class="message-time">Ayer</span>
+                                </div>
+                                <div class="message-subject">Recordatorio: Entrega de calificaciones</div>
+                                <div class="message-preview">Le recordamos que el plazo para entregar...</div>
+                            </div>
+
+                            <div class="message-item">
+                                <div class="message-header">
+                                    <strong>Carlos Mendoza</strong>
+                                    <span class="message-time">2 días</span>
+                                </div>
+                                <div class="message-subject">Solicitud de tutoría</div>
+                                <div class="message-preview">Buenos días profesora, me gustaría solicitar...</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab Content: Reportes -->
+                <div id="reportes" class="tab-content">
+                    <div class="section-header">
+                        <h3>Reportes y Estadísticas</h3>
+                        <p>Análisis del rendimiento académico de sus materias</p>
+                    </div>
+
+                    <div class="reports-grid">
+                        <div class="report-card">
+                            <h4>Rendimiento por Materia</h4>
+                            <div class="chart-placeholder">
+                                <div class="chart-bar" style="height: 85%;">
+                                    <span class="chart-label">Cálculo</span>
+                                    <span class="chart-value">85%</span>
+                                </div>
+                                <div class="chart-bar" style="height: 78%;">
+                                    <span class="chart-label">Álgebra</span>
+                                    <span class="chart-value">78%</span>
+                                </div>
+                                <div class="chart-bar" style="height: 82%;">
+                                    <span class="chart-label">Estadística</span>
+                                    <span class="chart-value">82%</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="report-card">
+                            <h4>Estadísticas Generales</h4>
+                            <div class="stats-list">
+                                <div class="stat-item">
+                                    <span class="stat-label">Total Estudiantes</span>
+                                    <span class="stat-value">115</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-label">Promedio General</span>
+                                    <span class="stat-value">81.7</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-label">Tasa de Aprobación</span>
+                                    <span class="stat-value">89%</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-label">Asistencia Promedio</span>
+                                    <span class="stat-value">92%</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="report-card">
+                            <h4>Acciones Rápidas</h4>
+                            <div class="quick-actions">
+                                <button class="btn-secondary" onclick="generateReport('grades')">Reporte de Calificaciones</button>
+                                <button class="btn-secondary" onclick="generateReport('attendance')">Reporte de Asistencia</button>
+                                <button class="btn-secondary" onclick="generateReport('performance')">Análisis de Rendimiento</button>
+                                <button class="btn-secondary" onclick="generateReport('semester')">Resumen Semestral</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="docente-script.js"></script>
+</body>
+</html>
