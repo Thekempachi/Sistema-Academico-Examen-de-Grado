@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema Académico - Universidad Nacional Boliviana</title>
+    <link rel="stylesheet" href="/Pagina_web/CSS/styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Header Banner -->
+    <header class="header-banner">
+        <div class="header-content">
+            <!-- Added menu toggle button -->
+            <button class="menu-toggle-btn" onclick="toggleSidebar()">
+                <i class="fas fa-bars"></i>
+            </button>
+            <div class="university-info">
+                <i class="fas fa-university"></i>
+                <span>Universidad Nacional Boliviana - Sistema Académico</span>
+            </div>
+            <button class="logout-btn" onclick="logout()">
+                <i class="fas fa-sign-out-alt"></i>
+                Cerrar Sesión
+            </button>
+        </div>
+    </header>
+
+    <!-- Sidebar -->
+    <nav class="sidebar" id="sidebar">
+        <div class="sidebar-content">
+            <div class="sidebar-header">
+                <i class="fas fa-graduation-cap"></i>
+                <span>Menú</span>
+            </div>
+            <ul class="sidebar-menu">
+                <!-- Added home/inicio button to return to main dashboard -->
+                <li>
+                    <button class="menu-btn" onclick="showSection('inicio')">
+                        <i class="fas fa-home"></i>
+                        <span>Inicio</span>
+                    </button>
+                </li>
+                <li>
+                    <button class="menu-btn" onclick="showSection('calendario')">
+                        <i class="fas fa-calendar-alt"></i>
+                        <span>Calendario</span>
+                    </button>
+                </li>
+                <li>
+                    <button class="menu-btn" onclick="showSection('notas')">
+                        <i class="fas fa-chart-line"></i>
+                        <span>Notas</span>
+                    </button>
+                </li>
+                <li>
+                    <button class="menu-btn" onclick="showSection('pensum')">
+                        <i class="fas fa-book-open"></i>
+                        <span>Pensum</span>
+                    </button>
+                </li>
+                <li>
+                    <button class="menu-btn" onclick="showSection('pagos')">
+                        <i class="fas fa-credit-card"></i>
+                        <span>Plan de Pago</span>
+                    </button>
+                </li>
+                <li>
+                    <button class="menu-btn" onclick="showSection('documentos')">
+                        <i class="fas fa-file-alt"></i>
+                        <span>Documentos</span>
+                    </button>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Welcome Section -->
+        <section id="inicio" class="content-section active">
+            <div class="welcome-section">
+                <h1>¡Bienvenido, Juan Carlos Pérez!</h1>
+                <p class="welcome-subtitle">Carrera: Ingeniería de Sistemas | Semestre: 5to</p>
+            </div>
+
+            <div class="subjects-section">
+                <h2>Tus Materias Actuales</h2>
+                <div class="subjects-grid">
+                    <div class="subject-card">
+                        <div class="subject-header">
+                            <h3>Programación Web</h3>
+                            <span class="module-badge">Módulo 3</span>
+                        </div>
+                        <div class="subject-info">
+                            <p><i class="fas fa-clock"></i> Lunes y Miércoles 14:00 - 16:00</p>
+                            <p><i class="fas fa-map-marker-alt"></i> Aula 205 - Edificio Central</p>
+                            <!-- Added teacher name to current subjects -->
+                            <p><i class="fas fa-user-tie"></i> Prof. María González</p>
+                        </div>
+                    </div>
+
+                    <div class="subject-card">
+                        <div class="subject-header">
+                            <h3>Base de Datos II</h3>
+                            <span class="module-badge">Módulo 2</span>
+                        </div>
+                        <div class="subject-info">
+                            <p><i class="fas fa-clock"></i> Martes y Jueves 08:00 - 10:00</p>
+                            <p><i class="fas fa-map-marker-alt"></i> Lab. Computación 1</p>
+                            <!-- Added teacher name -->
+                            <p><i class="fas fa-user-tie"></i> Prof. Carlos Mendoza</p>
+                        </div>
+                    </div>
+
+                    <div class="subject-card">
+                        <div class="subject-header">
+                            <h3>Ingeniería de Software</h3>
+                            <span class="module-badge">Módulo 4</span>
+                        </div>
+                        <div class="subject-info">
+                            <p><i class="fas fa-clock"></i> Viernes 16:00 - 20:00</p>
+                            <p><i class="fas fa-map-marker-alt"></i> Aula 301 - Edificio Sistemas</p>
+                            <!-- Added teacher name -->
+                            <p><i class="fas fa-user-tie"></i> Prof. Ana Rodríguez</p>
+                        </div>
+                    </div>
+
+                    <div class="subject-card">
+                        <div class="subject-header">
+                            <h3>Redes de Computadoras</h3>
+                            <span class="module-badge">Módulo 1</span>
+                        </div>
+                        <div class="subject-info">
+                            <p><i class="fas fa-clock"></i> Sábado 08:00 - 12:00</p>
+                            <p><i class="fas fa-map-marker-alt"></i> Lab. Redes</p>
+                            <!-- Added teacher name -->
+                            <p><i class="fas fa-user-tie"></i> Prof. Roberto Silva</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Added new section for subject offerings -->
+            <div class="offerings-section">
+                <h2>Ofertas de Materias</h2>
+                <p class="section-subtitle">Materias disponibles para próximos módulos del semestre actual</p>
+                <div class="subjects-grid">
+                    <div class="subject-card offering">
+                        <div class="subject-header">
+                            <h3>Inteligencia Artificial</h3>
+                            <span class="module-badge available">Módulo 5</span>
+                        </div>
+                        <div class="subject-info">
+                            <p><i class="fas fa-clock"></i> Lunes y Miércoles 16:00 - 18:00</p>
+                            <p><i class="fas fa-map-marker-alt"></i> Aula 401 - Edificio Sistemas</p>
+                            <p><i class="fas fa-users"></i> 25 cupos disponibles</p>
+                        </div>
+                        <button class="register-btn">Registrar</button>
+                    </div>
+
+                    <div class="subject-card offering">
+                        <div class="subject-header">
+                            <h3>Seguridad Informática</h3>
+                            <span class="module-badge available">Módulo 5</span>
+                        </div>
+                        <div class="subject-info">
+                            <p><i class="fas fa-clock"></i> Martes y Jueves 14:00 - 16:00</p>
+                            <p><i class="fas fa-map-marker-alt"></i> Lab. Seguridad</p>
+                            <p><i class="fas fa-users"></i> 18 cupos disponibles</p>
+                        </div>
+                        <button class="register-btn">Registrar</button>
+                    </div>
+
+                    <div class="subject-card offering">
+                        <div class="subject-header">
+                            <h3>Gestión de Proyectos</h3>
+                            <span class="module-badge available">Módulo 6</span>
+                        </div>
+                        <div class="subject-info">
+                            <p><i class="fas fa-clock"></i> Viernes 08:00 - 12:00</p>
+                            <p><i class="fas fa-map-marker-alt"></i> Aula 302 - Edificio Central</p>
+                            <p><i class="fas fa-users"></i> 30 cupos disponibles</p>
+                        </div>
+                        <button class="register-btn">Registrar</button>
+                    </div>
+
+                    <div class="subject-card offering">
+                        <div class="subject-header">
+                            <h3>Desarrollo Móvil</h3>
+                            <span class="module-badge available">Módulo 6</span>
+                        </div>
+                        <div class="subject-info">
+                            <p><i class="fas fa-clock"></i> Sábado 14:00 - 18:00</p>
+                            <p><i class="fas fa-map-marker-alt"></i> Lab. Móvil</p>
+                            <p><i class="fas fa-users"></i> 20 cupos disponibles</p>
+                        </div>
+                        <button class="register-btn">Registrar</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Calendar Section -->
+        <section id="calendario" class="content-section">
+            <h2>Calendario Académico</h2>
+            <div class="calendar-container">
+                <div class="calendar-header">
+                    <button onclick="previousMonth()">&lt;</button>
+                    <h3 id="currentMonth">Noviembre 2024</h3>
+                    <button onclick="nextMonth()">&gt;</button>
+                </div>
+                <div class="calendar-grid">
+                    <div class="calendar-day header">Dom</div>
+                    <div class="calendar-day header">Lun</div>
+                    <div class="calendar-day header">Mar</div>
+                    <div class="calendar-day header">Mié</div>
+                    <div class="calendar-day header">Jue</div>
+                    <div class="calendar-day header">Vie</div>
+                    <div class="calendar-day header">Sáb</div>
+                    <!-- Calendar days will be generated by JavaScript -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Grades Section -->
+        <section id="notas" class="content-section">
+            <h2>Resumen de Notas</h2>
+            <div class="grades-container">
+                <div class="semester-card">
+                    <h3>4to Semestre</h3>
+                    <div class="grade-item">
+                        <span>Programación I</span>
+                        <span class="grade">85</span>
+                    </div>
+                    <div class="grade-item">
+                        <span>Base de Datos I</span>
+                        <span class="grade">78</span>
+                    </div>
+                    <div class="grade-item">
+                        <span>Matemática Discreta</span>
+                        <span class="grade">92</span>
+                    </div>
+                </div>
+                <div class="semester-card">
+                    <h3>3er Semestre</h3>
+                    <div class="grade-item">
+                        <span>Algoritmos y Estructuras</span>
+                        <span class="grade">88</span>
+                    </div>
+                    <div class="grade-item">
+                        <span>Sistemas Operativos</span>
+                        <span class="grade">75</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Pensum Section -->
+        <section id="pensum" class="content-section">
+            <h2>Plan de Estudios - 5to Semestre</h2>
+            <div class="pensum-container">
+                <div class="current-semester">
+                    <h3>Materias Actuales (5to Semestre)</h3>
+                    <ul class="subject-list">
+                        <li class="enrolled">Programación Web</li>
+                        <li class="enrolled">Base de Datos II</li>
+                        <li class="enrolled">Ingeniería de Software</li>
+                        <li class="enrolled">Redes de Computadoras</li>
+                    </ul>
+                </div>
+                <div class="next-semester">
+                    <h3>Próximo Semestre (6to)</h3>
+                    <ul class="subject-list">
+                        <li>Inteligencia Artificial</li>
+                        <li>Seguridad Informática</li>
+                        <li>Proyecto de Grado I</li>
+                        <li>Gestión de Proyectos</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Payment Plan Section -->
+        <section id="pagos" class="content-section">
+            <h2>Plan de Pagos</h2>
+            <div class="payment-container">
+                <div class="payment-status">
+                    <div class="status-card paid">
+                        <i class="fas fa-check-circle"></i>
+                        <h3>Matrícula</h3>
+                        <p>Pagado - 15/02/2024</p>
+                    </div>
+                    <div class="status-card pending">
+                        <i class="fas fa-exclamation-circle"></i>
+                        <h3>Cuota Noviembre</h3>
+                        <p>Pendiente - Vence: 30/11/2024</p>
+                    </div>
+                    <div class="status-card upcoming">
+                        <i class="fas fa-clock"></i>
+                        <h3>Cuota Diciembre</h3>
+                        <p>Próximo - 31/12/2024</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Documents Section -->
+        <section id="documentos" class="content-section">
+            <h2>Documentos Personales</h2>
+            <div class="documents-container">
+                <div class="document-category">
+                    <h3>Documentos Pendientes</h3>
+                    <ul class="document-list">
+                        <li class="pending">
+                            <i class="fas fa-file-pdf"></i>
+                            <span>Certificado de Nacimiento (Examen de Grado)</span>
+                            <button class="upload-btn">Subir</button>
+                        </li>
+                        <li class="pending">
+                            <i class="fas fa-file-image"></i>
+                            <span>Fotografía 4x4 (Matriculación)</span>
+                            <button class="upload-btn">Subir</button>
+                        </li>
+                    </ul>
+                </div>
+                <div class="document-category">
+                    <h3>Documentos Aprobados</h3>
+                    <ul class="document-list">
+                        <li class="approved">
+                            <i class="fas fa-file-pdf"></i>
+                            <span>Certificado de Bachillerato</span>
+                            <span class="status">✓ Aprobado</span>
+                        </li>
+                        <li class="approved">
+                            <i class="fas fa-file-pdf"></i>
+                            <span>Cédula de Identidad</span>
+                            <span class="status">✓ Aprobado</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Support Button -->
+    <button class="support-btn" onclick="contactSupport()">
+        <i class="fas fa-headset"></i>
+        <span>Soporte</span>
+    </button>
+
+    <script src="script.js"></script>
+</body>
+</html>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema Académico - Universidad Nacional Boliviana</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Header Banner -->
+    <header class="header-banner">
+        <div class="header-content">
+            <!-- Added menu toggle button -->
+            <button class="menu-toggle-btn" onclick="toggleSidebar()">
+                <i class="fas fa-bars"></i>
+            </button>
+            <div class="university-info">
+                <i class="fas fa-university"></i>
+                <span>Universidad Nacional Boliviana - Sistema Académico</span>
+            </div>
+            <button class="logout-btn" onclick="logout()">
+                <i class="fas fa-sign-out-alt"></i>
+                Cerrar Sesión
+            </button>
+        </div>
+    </header>
+
+    <!-- Sidebar -->
+    <nav class="sidebar" id="sidebar">
+        <div class="sidebar-content">
+            <div class="sidebar-header">
+                <i class="fas fa-graduation-cap"></i>
+                <span>Menú</span>
+            </div>
+            <ul class="sidebar-menu">
+                <!-- Added home/inicio button to return to main dashboard -->
+                <li>
+                    <button class="menu-btn" onclick="showSection('inicio')">
+                        <i class="fas fa-home"></i>
+                        <span>Inicio</span>
+                    </button>
+                </li>
+                <li>
+                    <button class="menu-btn" onclick="showSection('calendario')">
+                        <i class="fas fa-calendar-alt"></i>
+                        <span>Calendario</span>
+                    </button>
+                </li>
+                <li>
+                    <button class="menu-btn" onclick="showSection('notas')">
+                        <i class="fas fa-chart-line"></i>
+                        <span>Notas</span>
+                    </button>
+                </li>
+                <li>
+                    <button class="menu-btn" onclick="showSection('pensum')">
+                        <i class="fas fa-book-open"></i>
+                        <span>Pensum</span>
+                    </button>
+                </li>
+                <li>
+                    <button class="menu-btn" onclick="showSection('pagos')">
+                        <i class="fas fa-credit-card"></i>
+                        <span>Plan de Pago</span>
+                    </button>
+                </li>
+                <li>
+                    <button class="menu-btn" onclick="showSection('documentos')">
+                        <i class="fas fa-file-alt"></i>
+                        <span>Documentos</span>
+                    </button>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Welcome Section -->
+        <section id="inicio" class="content-section active">
+            <div class="welcome-section">
+                <h1>¡Bienvenido, Juan Carlos Pérez!</h1>
+                <p class="welcome-subtitle">Carrera: Ingeniería de Sistemas | Semestre: 5to</p>
+            </div>
+
+            <div class="subjects-section">
+                <h2>Tus Materias Actuales</h2>
+                <div class="subjects-grid">
+                    <div class="subject-card">
+                        <div class="subject-header">
+                            <h3>Programación Web</h3>
+                            <span class="module-badge">Módulo 3</span>
+                        </div>
+                        <div class="subject-info">
+                            <p><i class="fas fa-clock"></i> Lunes y Miércoles 14:00 - 16:00</p>
+                            <p><i class="fas fa-map-marker-alt"></i> Aula 205 - Edificio Central</p>
+                            <!-- Added teacher name to current subjects -->
+                            <p><i class="fas fa-user-tie"></i> Prof. María González</p>
+                        </div>
+                    </div>
+
+                    <div class="subject-card">
+                        <div class="subject-header">
+                            <h3>Base de Datos II</h3>
+                            <span class="module-badge">Módulo 2</span>
+                        </div>
+                        <div class="subject-info">
+                            <p><i class="fas fa-clock"></i> Martes y Jueves 08:00 - 10:00</p>
+                            <p><i class="fas fa-map-marker-alt"></i> Lab. Computación 1</p>
+                            <!-- Added teacher name -->
+                            <p><i class="fas fa-user-tie"></i> Prof. Carlos Mendoza</p>
+                        </div>
+                    </div>
+
+                    <div class="subject-card">
+                        <div class="subject-header">
+                            <h3>Ingeniería de Software</h3>
+                            <span class="module-badge">Módulo 4</span>
+                        </div>
+                        <div class="subject-info">
+                            <p><i class="fas fa-clock"></i> Viernes 16:00 - 20:00</p>
+                            <p><i class="fas fa-map-marker-alt"></i> Aula 301 - Edificio Sistemas</p>
+                            <!-- Added teacher name -->
+                            <p><i class="fas fa-user-tie"></i> Prof. Ana Rodríguez</p>
+                        </div>
+                    </div>
+
+                    <div class="subject-card">
+                        <div class="subject-header">
+                            <h3>Redes de Computadoras</h3>
+                            <span class="module-badge">Módulo 1</span>
+                        </div>
+                        <div class="subject-info">
+                            <p><i class="fas fa-clock"></i> Sábado 08:00 - 12:00</p>
+                            <p><i class="fas fa-map-marker-alt"></i> Lab. Redes</p>
+                            <!-- Added teacher name -->
+                            <p><i class="fas fa-user-tie"></i> Prof. Roberto Silva</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Added new section for subject offerings -->
+            <div class="offerings-section">
+                <h2>Ofertas de Materias</h2>
+                <p class="section-subtitle">Materias disponibles para próximos módulos del semestre actual</p>
+                <div class="subjects-grid">
+                    <div class="subject-card offering">
+                        <div class="subject-header">
+                            <h3>Inteligencia Artificial</h3>
+                            <span class="module-badge available">Módulo 5</span>
+                        </div>
+                        <div class="subject-info">
+                            <p><i class="fas fa-clock"></i> Lunes y Miércoles 16:00 - 18:00</p>
+                            <p><i class="fas fa-map-marker-alt"></i> Aula 401 - Edificio Sistemas</p>
+                            <p><i class="fas fa-users"></i> 25 cupos disponibles</p>
+                        </div>
+                        <button class="register-btn">Registrar</button>
+                    </div>
+
+                    <div class="subject-card offering">
+                        <div class="subject-header">
+                            <h3>Seguridad Informática</h3>
+                            <span class="module-badge available">Módulo 5</span>
+                        </div>
+                        <div class="subject-info">
+                            <p><i class="fas fa-clock"></i> Martes y Jueves 14:00 - 16:00</p>
+                            <p><i class="fas fa-map-marker-alt"></i> Lab. Seguridad</p>
+                            <p><i class="fas fa-users"></i> 18 cupos disponibles</p>
+                        </div>
+                        <button class="register-btn">Registrar</button>
+                    </div>
+
+                    <div class="subject-card offering">
+                        <div class="subject-header">
+                            <h3>Gestión de Proyectos</h3>
+                            <span class="module-badge available">Módulo 6</span>
+                        </div>
+                        <div class="subject-info">
+                            <p><i class="fas fa-clock"></i> Viernes 08:00 - 12:00</p>
+                            <p><i class="fas fa-map-marker-alt"></i> Aula 302 - Edificio Central</p>
+                            <p><i class="fas fa-users"></i> 30 cupos disponibles</p>
+                        </div>
+                        <button class="register-btn">Registrar</button>
+                    </div>
+
+                    <div class="subject-card offering">
+                        <div class="subject-header">
+                            <h3>Desarrollo Móvil</h3>
+                            <span class="module-badge available">Módulo 6</span>
+                        </div>
+                        <div class="subject-info">
+                            <p><i class="fas fa-clock"></i> Sábado 14:00 - 18:00</p>
+                            <p><i class="fas fa-map-marker-alt"></i> Lab. Móvil</p>
+                            <p><i class="fas fa-users"></i> 20 cupos disponibles</p>
+                        </div>
+                        <button class="register-btn">Registrar</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Calendar Section -->
+        <section id="calendario" class="content-section">
+            <h2>Calendario Académico</h2>
+            <div class="calendar-container">
+                <div class="calendar-header">
+                    <button onclick="previousMonth()">&lt;</button>
+                    <h3 id="currentMonth">Noviembre 2024</h3>
+                    <button onclick="nextMonth()">&gt;</button>
+                </div>
+                <div class="calendar-grid">
+                    <div class="calendar-day header">Dom</div>
+                    <div class="calendar-day header">Lun</div>
+                    <div class="calendar-day header">Mar</div>
+                    <div class="calendar-day header">Mié</div>
+                    <div class="calendar-day header">Jue</div>
+                    <div class="calendar-day header">Vie</div>
+                    <div class="calendar-day header">Sáb</div>
+                    <!-- Calendar days will be generated by JavaScript -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Grades Section -->
+        <section id="notas" class="content-section">
+            <h2>Resumen de Notas</h2>
+            <div class="grades-container">
+                <div class="semester-card">
+                    <h3>4to Semestre</h3>
+                    <div class="grade-item">
+                        <span>Programación I</span>
+                        <span class="grade">85</span>
+                    </div>
+                    <div class="grade-item">
+                        <span>Base de Datos I</span>
+                        <span class="grade">78</span>
+                    </div>
+                    <div class="grade-item">
+                        <span>Matemática Discreta</span>
+                        <span class="grade">92</span>
+                    </div>
+                </div>
+                <div class="semester-card">
+                    <h3>3er Semestre</h3>
+                    <div class="grade-item">
+                        <span>Algoritmos y Estructuras</span>
+                        <span class="grade">88</span>
+                    </div>
+                    <div class="grade-item">
+                        <span>Sistemas Operativos</span>
+                        <span class="grade">75</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Pensum Section -->
+        <section id="pensum" class="content-section">
+            <h2>Plan de Estudios - 5to Semestre</h2>
+            <div class="pensum-container">
+                <div class="current-semester">
+                    <h3>Materias Actuales (5to Semestre)</h3>
+                    <ul class="subject-list">
+                        <li class="enrolled">Programación Web</li>
+                        <li class="enrolled">Base de Datos II</li>
+                        <li class="enrolled">Ingeniería de Software</li>
+                        <li class="enrolled">Redes de Computadoras</li>
+                    </ul>
+                </div>
+                <div class="next-semester">
+                    <h3>Próximo Semestre (6to)</h3>
+                    <ul class="subject-list">
+                        <li>Inteligencia Artificial</li>
+                        <li>Seguridad Informática</li>
+                        <li>Proyecto de Grado I</li>
+                        <li>Gestión de Proyectos</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Payment Plan Section -->
+        <section id="pagos" class="content-section">
+            <h2>Plan de Pagos</h2>
+            <div class="payment-container">
+                <div class="payment-status">
+                    <div class="status-card paid">
+                        <i class="fas fa-check-circle"></i>
+                        <h3>Matrícula</h3>
+                        <p>Pagado - 15/02/2024</p>
+                    </div>
+                    <div class="status-card pending">
+                        <i class="fas fa-exclamation-circle"></i>
+                        <h3>Cuota Noviembre</h3>
+                        <p>Pendiente - Vence: 30/11/2024</p>
+                    </div>
+                    <div class="status-card upcoming">
+                        <i class="fas fa-clock"></i>
+                        <h3>Cuota Diciembre</h3>
+                        <p>Próximo - 31/12/2024</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Documents Section -->
+        <section id="documentos" class="content-section">
+            <h2>Documentos Personales</h2>
+            <div class="documents-container">
+                <div class="document-category">
+                    <h3>Documentos Pendientes</h3>
+                    <ul class="document-list">
+                        <li class="pending">
+                            <i class="fas fa-file-pdf"></i>
+                            <span>Certificado de Nacimiento (Examen de Grado)</span>
+                            <button class="upload-btn">Subir</button>
+                        </li>
+                        <li class="pending">
+                            <i class="fas fa-file-image"></i>
+                            <span>Fotografía 4x4 (Matriculación)</span>
+                            <button class="upload-btn">Subir</button>
+                        </li>
+                    </ul>
+                </div>
+                <div class="document-category">
+                    <h3>Documentos Aprobados</h3>
+                    <ul class="document-list">
+                        <li class="approved">
+                            <i class="fas fa-file-pdf"></i>
+                            <span>Certificado de Bachillerato</span>
+                            <span class="status">✓ Aprobado</span>
+                        </li>
+                        <li class="approved">
+                            <i class="fas fa-file-pdf"></i>
+                            <span>Cédula de Identidad</span>
+                            <span class="status">✓ Aprobado</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Support Button -->
+    <button class="support-btn" onclick="contactSupport()">
+        <i class="fas fa-headset"></i>
+        <span>Soporte</span>
+    </button>
+
+    <script src="/Pagina_web/JS/script.js"></script>
+</body>
+</html>
