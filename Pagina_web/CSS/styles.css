@@ -1546,3 +1546,23 @@ input[type="password"]:focus {
   }
 }
 
+/* === Parche: mismo estilo para el input de Nro. de registro (type=text) === */
+input[type="text"] {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 0.375rem;
+  background-color: var(--input);
+  font-size: 0.875rem;
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+input[type="text"]:focus {
+  outline: none;
+  border-color: var(--ring);
+  box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.1);
+}
+
+/* === Parche: que .hidden realmente oculte la alerta === */
+.alert.hidden { 
+  display: none !important; 
+}
