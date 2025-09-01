@@ -113,7 +113,9 @@
   </div>
 
   <script>
-    const ENDPOINT = "https://im-ventas-de-computadoras.com/Sistema_Academico/login.php";
+  // URL base para consumir cualquier API PHP del servidor
+  const API_BASE = "https://im-ventas-de-computadoras.com/Sistema_Academico/";
+  const ENDPOINT = API_BASE + "login.php";
     const DEST = {
       DOCENTE: "/Pagina_web/html/docente.html",
       ESTUDIANTE: "/Pagina_web/html/estudiantes.html"
@@ -183,7 +185,8 @@
       const body = new URLSearchParams({ rol: currentRole, usuario, password });
 
       try {
-        const resp = await fetch(ENDPOINT, {
+  const resp = await fetch(ENDPOINT, {
+
           method: "POST",
           headers: { "Content-Type": "application/x-www-form-urlencoded" },
           body
@@ -194,6 +197,17 @@
         try { data = JSON.parse(text); } catch { data = { ok:false, error:"RESP_JSON_INVALIDA", raw:text }; }
 
         if (resp.ok && data.ok) {
+          if (currentRole === "DOCENTE") {
+            // Guardar email, nombre y apellido del docente en localStorage
+            if (data.docente) {
+              localStorage.setItem("docente_email", data.docente.email);
+              localStorage.setItem("docente_nombre", data.docente.nombre);
+              localStorage.setItem("docente_apellido", data.docente.apellido);
+            } else {
+              // fallback: solo email
+              localStorage.setItem("docente_email", usuario);
+            }
+          }
           window.location.href = data.redirect || DEST[data.rol] || "/";
         } else if (resp.status === 401 || data.error === "CREDENCIALES_INVALIDAS") {
           showAlert("Usuario o contraseña incorrectos.");

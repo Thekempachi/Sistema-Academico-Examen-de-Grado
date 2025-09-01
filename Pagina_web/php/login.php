@@ -1,44 +1,107 @@
 <?php
-// Configuración de la base de datos
+// Debug (desactiva en producción)
+mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
+ini_set('display_errors', 1);
+error_reporting(E_ALL);
+
+// CORS/JSON
+header('Access-Control-Allow-Origin: *');
+header('Access-Control-Allow-Methods: POST, OPTIONS');
+header('Access-Control-Allow-Headers: Content-Type');
+header('Content-Type: application/json; charset=utf-8');
+
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') { http_response_code(204); exit; }
+
+// BD
 $servername = "localhost";
-$username = "u605613151_Admin";
-$password = "Blefast123*";
-$dbname = "u605613151_sistema_academ";
+$username   = "u605613151_admin";
+$password   = "C0ntrasenPassword@";
+$dbname     = "u605613151_sistema_academ";
 
-// Crear conexión
 $conn = new mysqli($servername, $username, $password, $dbname);
+$conn->set_charset("utf8mb4");
 
-// Verificar conexión
-if ($conn->connect_error) {
-    die("Conexión fallida: " . $conn->connect_error);
+// Inputs
+$rol      = isset($_POST['rol'])      ? trim($_POST['rol'])      : '';
+$usuario  = isset($_POST['usuario'])  ? trim($_POST['usuario'])  : '';
+$pwdPlain = isset($_POST['password']) ? trim($_POST['password']) : '';
+
+if ($rol === '' || $usuario === '' || $pwdPlain === '') {
+  http_response_code(400);
+  echo json_encode(['ok'=>false,'error'=>'FALTAN_DATOS']); exit;
 }
 
-// Obtener datos del formulario
-$nombre = $_POST['nombre'];
-$password = $_POST['password'];
-
-// Consulta para verificar credenciales
-$sql = "SELECT p.* FROM Persona p 
-        INNER JOIN Usuario u ON p.id = u.persona_id 
-        WHERE p.nombre = ? AND u.password = ?";
-$stmt = $conn->prepare($sql);
-$stmt->bind_param("ss", $nombre, $password);
-$stmt->execute();
-$result = $stmt->get_result();
-
-if ($result->num_rows > 0) {
-    // Login exitoso
-    session_start();
-    $_SESSION['loggedin'] = true;
-    $_SESSION['nombre'] = $nombre;
-    
-    echo "Login exitoso. Bienvenido " . $nombre;
-    // Aquí puedes redirigir a otra página: header("Location: dashboard.php");
-} else {
-    // Login fallido
-    echo "Nombre de usuario o contraseña incorrectos.";
+$rol = strtoupper($rol);
+if (!in_array($rol, ['ESTUDIANTE','DOCENTE'], true)) {
+  http_response_code(403);
+  echo json_encode(['ok'=>false,'error'=>'ROL_NO_PERMITIDO']); exit;
 }
 
-$stmt->close();
-$conn->close();
-?>
+try {
+  if ($rol === 'DOCENTE') {
+    // DOCENTE: email + password + usuario ACTIVO + docente ACTIVO
+    $email = mb_strtolower($usuario, 'UTF-8');
+    $sql = "
+      SELECT u.id_Usuario, u.estado_usuario
+      FROM usuario u
+      JOIN docente d ON d.id_Docente = u.id_Usuario
+      WHERE u.email = ?
+        AND u.password = ?
+        AND UPPER(u.estado_usuario) = 'ACTIVO'
+        AND UPPER(d.estado) = 'ACTIVO'
+      LIMIT 1
+    ";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("ss", $email, $pwdPlain);
+
+  } else {
+    // ESTUDIANTE: nro_registro + password + usuario ACTIVO
+    // (CAMBIO) Traemos nombre y apellido desde persona
+    $sql = "
+      SELECT u.id_Usuario, u.estado_usuario,
+             p.nombre AS nombre, p.apellido AS apellido
+      FROM estudiante e
+      JOIN usuario u ON u.id_Usuario = e.id_Estudiante
+      JOIN persona p ON p.id_Persona = u.id_Usuario
+      WHERE e.nro_registro = ?
+        AND u.password = ?
+        AND UPPER(u.estado_usuario) = 'ACTIVO'
+      LIMIT 1
+    ";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("ss", $usuario, $pwdPlain);
+  }
+
+  $stmt->execute();
+  $res = $stmt->get_result();
+
+  if ($res && $res->num_rows === 1) {
+    $redirect = ($rol === 'DOCENTE')
+      ? '/Pagina_web/html/docente.html'
+      : '/Pagina_web/html/estudiantes.html';
+
+    // (CAMBIO) incluir nombre/apellido SOLO si es estudiante
+    $payload = ['ok'=>true,'rol'=>$rol,'redirect'=>$redirect];
+
+    if ($rol === 'ESTUDIANTE') {
+      $row = $res->fetch_assoc();
+      $payload['nombre']   = $row['nombre']   ?? '';
+      $payload['apellido'] = $row['apellido'] ?? '';
+    }
+
+    http_response_code(200);
+    echo json_encode($payload);
+
+  } else {
+    // Puede ser credencial inválida o estado no ACTIVO
+    http_response_code(401);
+    echo json_encode(['ok'=>false,'error'=>'CREDENCIALES_INVALIDAS_O_INACTIVO']);
+  }
+
+  $stmt->close();
+  $conn->close();
+
+} catch (Throwable $e) {
+  http_response_code(500);
+  echo json_encode(['ok'=>false,'error'=>'SERVER_ERROR','msg'=>$e->getMessage()]);
+}
