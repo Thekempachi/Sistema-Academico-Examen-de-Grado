@@ -1,21 +1,3 @@
-// Global variables
-let currentMonth = new Date().getMonth()
-let currentYear = new Date().getFullYear()
-const months = [
-  "Enero",
-  "Febrero",
-  "Marzo",
-  "Abril",
-  "Mayo",
-  "Junio",
-  "Julio",
-  "Agosto",
-  "Septiembre",
-  "Octubre",
-  "Noviembre",
-  "Diciembre",
-]
-
 // Initialize the application
 document.addEventListener("DOMContentLoaded", () => {
   generateCalendar()
@@ -44,74 +26,6 @@ function showSection(sectionId) {
 
   const sidebar = document.getElementById("sidebar")
   sidebar.classList.remove("active")
-
-  // Special handling for calendar section
-  if (sectionId === "calendario") {
-    generateCalendar()
-  }
-}
-
-// Calendar functions
-function generateCalendar() {
-  const calendarGrid = document.querySelector(".calendar-grid")
-  const currentMonthElement = document.getElementById("currentMonth")
-
-  // Update month display
-  currentMonthElement.textContent = `${months[currentMonth]} ${currentYear}`
-
-  // Clear existing calendar days (keep headers)
-  const existingDays = calendarGrid.querySelectorAll(".calendar-day:not(.header)")
-  existingDays.forEach((day) => day.remove())
-
-  // Get first day of month and number of days
-  const firstDay = new Date(currentYear, currentMonth, 1).getDay()
-  const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate()
-  const today = new Date()
-
-  // Add empty cells for days before month starts
-  for (let i = 0; i < firstDay; i++) {
-    const emptyDay = document.createElement("div")
-    emptyDay.className = "calendar-day"
-    calendarGrid.appendChild(emptyDay)
-  }
-
-  // Add days of the month
-  for (let day = 1; day <= daysInMonth; day++) {
-    const dayElement = document.createElement("div")
-    dayElement.className = "calendar-day"
-    dayElement.textContent = day
-
-    // Highlight today
-    if (currentYear === today.getFullYear() && currentMonth === today.getMonth() && day === today.getDate()) {
-      dayElement.classList.add("today")
-    }
-
-    // Add some sample events
-    if (day === 15 || day === 22 || day === 28) {
-      dayElement.classList.add("event")
-      dayElement.title = "Examen programado"
-    }
-
-    calendarGrid.appendChild(dayElement)
-  }
-}
-
-function previousMonth() {
-  currentMonth--
-  if (currentMonth < 0) {
-    currentMonth = 11
-    currentYear--
-  }
-  generateCalendar()
-}
-
-function nextMonth() {
-  currentMonth++
-  if (currentMonth > 11) {
-    currentMonth = 0
-    currentYear++
-  }
-  generateCalendar()
 }
 
 // Logout function
@@ -281,4 +195,3 @@ function handleLogin(event) {
 function showForgotPassword() {
   showMessage("error", "Contacte al administrador del sistema para recuperar su contraseña")
 }
-
