@@ -12,20 +12,37 @@
 		<ul id="materias-list"></ul>
 		<div id="estudiantes-section" style="display:none;">
 			<h2 id="materia-titulo"></h2>
-			<form id="asistencia-notas-form">
-				<input type="hidden" name="id_Oferta_Materia" id="id_Oferta_Materia">
-				<table id="estudiantes-table">
+			<form id="asistencia-form">
+				<input type="hidden" name="id_Oferta_Materia" id="id_Oferta_Materia_asistencia">
+				<h3>Planilla de Asistencia (30 días)</h3>
+				<div style="overflow-x:auto;">
+					<table id="asistencia-table">
+						<thead>
+							<tr>
+								<th>Nombre</th>
+								<th>Registro</th>
+								<!-- Días -->
+							</tr>
+						</thead>
+						<tbody></tbody>
+					</table>
+				</div>
+				<button type="submit">Guardar Asistencia</button>
+			</form>
+			<form id="notas-form" style="margin-top:2em;">
+				<input type="hidden" name="id_Oferta_Materia" id="id_Oferta_Materia_nota">
+				<h3>Registro de Notas</h3>
+				<table id="notas-table">
 					<thead>
 						<tr>
 							<th>Nombre</th>
 							<th>Registro</th>
-							<th>Asistencia</th>
 							<th>Nota</th>
 						</tr>
 					</thead>
 					<tbody></tbody>
 				</table>
-				<button type="submit">Guardar Asistencia y Notas</button>
+				<button type="submit">Guardar Notas</button>
 			</form>
 			<button onclick="cerrarEstudiantes()">Cerrar</button>
 		</div>
@@ -61,6 +78,12 @@
 			document.getElementById("docente-nombre").textContent = `Bienvenido, ${data.docente.nombre} ${data.docente.apellido}`;
 			ul.innerHTML = "";
 			materiasDocente = data.materias;
+			// Guardar id_Docente en localStorage para uso en envíos de notas
+			if (data.materias.length > 0 && data.materias[0].id_docente) {
+				localStorage.setItem("docente_id", data.materias[0].id_docente);
+			} else if (data.docente && data.docente.id_docente) {
+				localStorage.setItem("docente_id", data.docente.id_docente);
+			}
 			data.materias.forEach((m, idx) => {
 				const li = document.createElement("li");
 				li.innerHTML = `<div><b>${m.nombre}</b> <span style='color:#2a4d8f;'>(Código: ${m.codigo})</span> Grupo: <b>${m.grupo}</b></div><button data-idx='${idx}' class='btn-ver-estudiantes'>Ver estudiantes</button>`;
@@ -77,53 +100,86 @@
 		}
 	});
 
+
 	function cargarEstudiantesMateria(idx) {
 		const materia = materiasDocente[idx];
 		document.getElementById("materias-list").style.display = "none";
 		document.getElementById("estudiantes-section").style.display = "block";
 		document.getElementById("materia-titulo").textContent = `Estudiantes de ${materia.nombre} (${materia.codigo})`;
-		document.getElementById("id_Oferta_Materia").value = materia.id_Oferta_Materia;
-		// Si ya tenemos los estudiantes en el objeto, los usamos. Si no, los pedimos a la API (por si la API cambia)
+		document.getElementById("id_Oferta_Materia_asistencia").value = materia.id_Oferta_Materia;
+		document.getElementById("id_Oferta_Materia_nota").value = materia.id_Oferta_Materia;
 		if (materia.estudiantes && materia.estudiantes.length > 0) {
-			renderEstudiantes(materia.estudiantes);
+			renderAsistencia(materia.estudiantes);
+			renderNotas(materia.estudiantes);
 		} else {
-			// fallback: pedir a la API (puedes crear una API específica si lo deseas)
 			fetch(API_BASE + "get_materias_docente.php?email=" + encodeURIComponent(docenteEmail))
 				.then(r => r.json())
 				.then(data => {
 					if (data.ok && data.materias[idx] && data.materias[idx].estudiantes) {
-						renderEstudiantes(data.materias[idx].estudiantes);
+						renderAsistencia(data.materias[idx].estudiantes);
+						renderNotas(data.materias[idx].estudiantes);
 					} else {
-						renderEstudiantes([]);
+						renderAsistencia([]);
+						renderNotas([]);
 					}
 				});
 		}
 	}
 
-	function renderEstudiantes(estudiantes) {
-		const tbody = document.querySelector("#estudiantes-table tbody");
+
+	// Genera planilla de asistencia para 30 días (puedes ajustar fechas dinámicamente)
+	function renderAsistencia(estudiantes) {
+		const tbody = document.querySelector("#asistencia-table tbody");
+		const thead = document.querySelector("#asistencia-table thead tr");
 		tbody.innerHTML = "";
+		// Generar cabecera de días (1 al 30)
+		let days = 30;
+		let startDate = new Date();
+		startDate.setDate(1); // Primer día del mes actual
+		thead.innerHTML = `<th>Nombre</th><th>Registro</th>`;
+		for (let d = 0; d < days; d++) {
+			let day = new Date(startDate);
+			day.setDate(startDate.getDate() + d);
+			let label = day.toISOString().slice(5, 10); // MM-DD
+			thead.innerHTML += `<th>${label}<br>Obs.</th>`;
+		}
 		if (!estudiantes || estudiantes.length === 0) {
-			tbody.innerHTML = `<tr><td colspan='4'>No hay estudiantes inscritos.</td></tr>`;
+			tbody.innerHTML = `<tr><td colspan='${days*2+2}'>No hay estudiantes inscritos.</td></tr>`;
 		} else {
 			estudiantes.forEach(e => {
-				const tr = document.createElement("tr");
-				tr.innerHTML = `
-					<td>${e.nombre} ${e.apellido}</td>
-					<td>${e.nro_registro}</td>
-					<td>
-						<select name="asistencia[${e.id_Estudiante}]">
-							<option value="Asistió">Asistió</option>
-							<option value="Faltó">Faltó</option>
-						</select>
-					</td>
-					<td>
-						<input type="number" name="nota[${e.id_Estudiante}]" min="0" max="100">
-					</td>
-				`;
-				tbody.appendChild(tr);
+				let tr = `<td>${e.nombre} ${e.apellido}</td><td>${e.nro_registro}</td>`;
+				for (let d = 0; d < days; d++) {
+					let day = new Date(startDate);
+					day.setDate(startDate.getDate() + d);
+					let fecha = day.toISOString().slice(0, 10);
+							tr += `<td style='min-width:60px;'>
+								<select name="asistencia_${e.id_Estudiante}_${fecha}"><option value="Asistió">✔</option><option value="Faltó">✘</option></select>
+								<input type="hidden" name="id_Estudiante_${e.id_Estudiante}_${fecha}" value="${e.id_Estudiante}">
+								<input type="hidden" name="id_Oferta_Materia_${e.id_Estudiante}_${fecha}" value="${document.getElementById('id_Oferta_Materia_asistencia').value}">
+								<input type="hidden" name="fecha_${e.id_Estudiante}_${fecha}" value="${fecha}">
+							</td>`;
+				}
+				tbody.innerHTML += `<tr>${tr}</tr>`;
 			});
 		}
+	}
+
+	function renderNotas(estudiantes) {
+		const tbody = document.querySelector("#notas-table tbody");
+		tbody.innerHTML = "";
+			if (!estudiantes || estudiantes.length === 0) {
+				tbody.innerHTML = `<tr><td colspan='3'>No hay estudiantes inscritos.</td></tr>`;
+			} else {
+				estudiantes.forEach(e => {
+					tbody.innerHTML += `
+						<tr>
+							<td>${e.nombre} ${e.apellido}</td>
+							<td>${e.nro_registro}</td>
+							<td><input type="number" name="nota_${e.id_Estudiante}" min="0" max="100"></td>
+						</tr>
+					`;
+				});
+			}
 	}
 
 	function cerrarEstudiantes() {
@@ -132,22 +188,95 @@
 		document.getElementById("mensaje").innerHTML = "";
 	}
 
-	// 4. Guardar asistencia y notas
-	document.getElementById("asistencia-notas-form").addEventListener("submit", function(e) {
+
+	// Guardar asistencia (planilla)
+
+	document.getElementById("asistencia-form").addEventListener("submit", function(e) {
 		e.preventDefault();
 		const form = e.target;
-		const formData = new FormData(form);
-		fetch(API_BASE + "acciones_docente.php", {
-			method: "POST",
-			body: formData
-		})
-		.then(r => r.text())
-		.then(resp => {
-			document.getElementById("mensaje").innerHTML = resp;
-		})
-		.catch(() => {
-			document.getElementById("mensaje").innerHTML = "<div style='color:red'>Error al guardar datos.</div>";
+		let errores = 0;
+		// Recorrer todos los selects de asistencia
+			const selects = form.querySelectorAll("select[name^='asistencia_']");
+			selects.forEach(sel => {
+				const [_, id_Estudiante, fecha] = sel.name.split('_');
+				const id_Oferta_Materia = form.querySelector(`input[name='id_Oferta_Materia_${id_Estudiante}_${fecha}']`).value;
+				const payload = {
+					id_Estudiante,
+					id_Oferta_Materia,
+					fecha
+				};
+				fetch(API_BASE + "asignar_asistencia.php", {
+					method: "POST",
+					headers: { "Content-Type": "application/json" },
+					body: JSON.stringify(payload)
+				})
+				.then(r => r.json())
+				.then(resp => { if (!resp.ok) errores++; })
+				.catch(() => { errores++; });
+			});
+		setTimeout(() => {
+			if (errores === 0) {
+				document.getElementById("mensaje").innerHTML = '<div style="color:green">Asistencia guardada correctamente.</div>';
+			} else {
+				document.getElementById("mensaje").innerHTML = '<div style="color:red">Error al guardar algunas asistencias.</div>';
+			}
+		}, 1200);
+	});
+
+	// Guardar notas (formulario separado)
+
+	document.getElementById("notas-form").addEventListener("submit", function(e) {
+		e.preventDefault();
+		const form = e.target;
+		const id_Oferta_Materia = document.getElementById("id_Oferta_Materia_nota").value;
+		let id_Docente = localStorage.getItem("docente_id") || null;
+		let errores = 0;
+		let vacios = 0;
+		// Recorrer filas de notas
+		const rows = form.querySelectorAll("tbody tr");
+		rows.forEach(row => {
+			const nombre = row.children[0].textContent.trim();
+			const nro_registro = row.children[1].textContent.trim();
+			const inputNota = row.querySelector('input[type="number"]');
+			let notaStr = inputNota.value;
+			let nota = notaStr.trim();
+			// Validar campos requeridos (nota puede ser 0, pero no vacío ni texto)
+			if (!nro_registro || !id_Oferta_Materia || nota === '' || isNaN(Number(nota)) || !id_Docente) {
+				vacios++;
+				inputNota.style.background = '#ffd6d6';
+				return;
+			}
+			// Si es número válido, limpiar fondo
+			inputNota.style.background = '';
+			nota = Number(nota);
+			const payload = {
+				nro_registro,
+				id_Oferta_Materia,
+				valor: nota,
+				id_Docente
+			};
+			console.log('Enviando nota:', payload);
+			fetch(API_BASE + "asignar_nota.php", {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify(payload)
+			})
+			.then(async r => {
+				const resp = await r.json();
+				console.log('Respuesta asignar_nota.php:', resp);
+				if (!resp.ok) errores++;
+			})
+			.catch((err) => { console.error('Error fetch nota:', err); errores++; });
 		});
+		setTimeout(() => {
+			if (vacios > 0) {
+				document.getElementById("mensaje").innerHTML = '<div style="color:orange">Algunas filas no se enviaron porque faltan datos obligatorios.</div>';
+			} else if (errores === 0) {
+				document.getElementById("mensaje").innerHTML = '<div style="color:green">Notas guardadas correctamente.</div>';
+			} else {
+				document.getElementById("mensaje").innerHTML = '<div style="color:red">Error al guardar algunas notas.</div>';
+			}
+		}, 1200);
 	});
 	</script>
 </body>

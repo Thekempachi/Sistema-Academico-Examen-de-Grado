@@ -1,33 +1,44 @@
 <?php
 // Pagina_web/php/asignar_nota.php
-
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Headers: Content-Type');
 header('Content-Type: application/json');
-require_once 'conexion.php';
-// session_start();
 
-// Recibe: id_Estudiante, id_Oferta_Materia, id_Docente, tipo, valor, fecha, observacion
+// Conexión manual
+$host     = "localhost";
+$dbname   = "u605613151_sistema_academ";
+$user     = "u605613151_admin";
+$password = "C0ntrasenPassword@";
+$conn = new mysqli($host, $user, $password, $dbname);
+$conn->set_charset("utf8mb4");
+
+
+
 $data = json_decode(file_get_contents('php://input'), true);
-if (!isset($data['id_Estudiante'], $data['id_Oferta_Materia'], $data['id_Docente'], $data['tipo'], $data['valor'], $data['fecha'])) {
+if (!isset($data['nro_registro'], $data['id_Oferta_Materia'], $data['valor'], $data['id_Docente'])) {
     echo json_encode(['ok'=>false, 'error'=>'FALTAN_DATOS']);
     exit;
 }
-$id_est = $data['id_Estudiante'];
-$id_oferta = $data['id_Oferta_Materia'];
-$id_doc = $data['id_Docente'];
-$tipo = $data['tipo'];
-$valor = $data['valor'];
-$fecha = $data['fecha'];
-$obs = isset($data['observacion']) ? $data['observacion'] : null;
 
-// Insertar nota (puedes mejorar para actualizar si ya existe)
-$sql = "INSERT INTO nota_parcial (tipo, valor, fecha, observacion, id_Docente, id_Estudiante, id_Oferta_Materia)
-        VALUES (?, ?, ?, ?, ?, ?, ?)";
-$stmt = $conn->prepare($sql);
-$stmt->bind_param('sdssiis', $tipo, $valor, $fecha, $obs, $id_doc, $id_est, $id_oferta);
-if ($stmt->execute()) {
-    echo json_encode(['ok'=>true]);
-} else {
-    echo json_encode(['ok'=>false, 'error'=>$conn->error]);
+$nro_registro = $data['nro_registro'];
+$id_oferta = $data['id_Oferta_Materia'];
+$valor = $data['valor'];
+$id_docente = $data['id_Docente'];
+
+// Usar el nuevo procedimiento almacenado NotaParcial_Insertar_Simple (sin observacion ni tipo)
+$p_id_nota = null;
+$p_status = null;
+$stmt = $conn->prepare("CALL NotaParcial_Insertar_Simple(?, ?, ?, ?, @p_id_nota, @p_status)");
+$stmt->bind_param('sidi', $nro_registro, $id_docente, $id_oferta, $valor);
+if (!$stmt->execute()) {
+    echo json_encode(['ok'=>false, 'error'=>'PROC_NOTA: '.$conn->error]);
+    exit;
 }
+$stmt->close();
+$res = $conn->query("SELECT @p_id_nota AS id_nota, @p_status AS status");
+$row = $res->fetch_assoc();
+if ($row['status'] !== 'OK') {
+    echo json_encode(['ok'=>false, 'error'=>'PROC_NOTA: '.$row['status']]);
+    exit;
+}
+echo json_encode(['ok'=>true, 'msg'=>'Nota registrada.', 'id_nota'=>$row['id_nota']]);
