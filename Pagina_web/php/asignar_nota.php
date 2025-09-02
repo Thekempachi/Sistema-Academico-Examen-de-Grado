@@ -14,16 +14,24 @@ $conn->set_charset("utf8mb4");
 
 
 
-$data = json_decode(file_get_contents('php://input'), true);
-if (!isset($data['nro_registro'], $data['id_Oferta_Materia'], $data['valor'], $data['id_Docente'])) {
+
+// Permitir datos por POST (JSON) o GET (URL)
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $data = json_decode(file_get_contents('php://input'), true);
+    $nro_registro = isset($data['nro_registro']) ? $data['nro_registro'] : null;
+    $id_oferta = isset($data['id_Oferta_Materia']) ? $data['id_Oferta_Materia'] : null;
+    $valor = isset($data['valor']) ? $data['valor'] : null;
+    $id_docente = isset($data['id_Docente']) ? $data['id_Docente'] : null;
+} else {
+    $nro_registro = isset($_GET['nro_registro']) ? $_GET['nro_registro'] : null;
+    $id_oferta = isset($_GET['id_Oferta_Materia']) ? $_GET['id_Oferta_Materia'] : null;
+    $valor = isset($_GET['valor']) ? $_GET['valor'] : null;
+    $id_docente = isset($_GET['id_Docente']) ? $_GET['id_Docente'] : null;
+}
+if (!$nro_registro || !$id_oferta || $valor === null || !$id_docente) {
     echo json_encode(['ok'=>false, 'error'=>'FALTAN_DATOS']);
     exit;
 }
-
-$nro_registro = $data['nro_registro'];
-$id_oferta = $data['id_Oferta_Materia'];
-$valor = $data['valor'];
-$id_docente = $data['id_Docente'];
 
 // Usar el nuevo procedimiento almacenado NotaParcial_Insertar_Simple (sin observacion ni tipo)
 $p_id_nota = null;

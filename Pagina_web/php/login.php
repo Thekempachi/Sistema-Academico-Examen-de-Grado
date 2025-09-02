@@ -42,9 +42,12 @@ try {
     // DOCENTE: email + password + usuario ACTIVO + docente ACTIVO
     $email = mb_strtolower($usuario, 'UTF-8');
     $sql = "
-      SELECT u.id_Usuario, u.estado_usuario
+      SELECT u.id_Usuario, u.estado_usuario,
+             p.nombre AS nombre, p.apellido AS apellido,
+             d.id_Docente AS id_docente, u.email
       FROM usuario u
       JOIN docente d ON d.id_Docente = u.id_Usuario
+      JOIN persona p ON p.id_Persona = u.id_Usuario
       WHERE u.email = ?
         AND u.password = ?
         AND UPPER(u.estado_usuario) = 'ACTIVO'
@@ -80,13 +83,19 @@ try {
       ? '/Pagina_web/html/docente.html'
       : '/Pagina_web/html/estudiantes.html';
 
-    // (CAMBIO) incluir nombre/apellido SOLO si es estudiante
     $payload = ['ok'=>true,'rol'=>$rol,'redirect'=>$redirect];
 
+    $row = $res->fetch_assoc();
     if ($rol === 'ESTUDIANTE') {
-      $row = $res->fetch_assoc();
       $payload['nombre']   = $row['nombre']   ?? '';
       $payload['apellido'] = $row['apellido'] ?? '';
+    } else if ($rol === 'DOCENTE') {
+      $payload['docente'] = [
+        'id_docente' => $row['id_docente'],
+        'nombre'     => $row['nombre'],
+        'apellido'   => $row['apellido'],
+        'email'      => $row['email']
+      ];
     }
 
     http_response_code(200);

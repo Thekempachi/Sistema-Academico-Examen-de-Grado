@@ -12,21 +12,19 @@
 		<ul id="materias-list"></ul>
 		<div id="estudiantes-section" style="display:none;">
 			<h2 id="materia-titulo"></h2>
-			<form id="asistencia-form">
+			<form id="asistencia-form" style="margin-bottom:2em;">
 				<input type="hidden" name="id_Oferta_Materia" id="id_Oferta_Materia_asistencia">
-				<h3>Planilla de Asistencia (30 días)</h3>
-				<div style="overflow-x:auto;">
-					<table id="asistencia-table">
-						<thead>
-							<tr>
-								<th>Nombre</th>
-								<th>Registro</th>
-								<!-- Días -->
-							</tr>
-						</thead>
-						<tbody></tbody>
-					</table>
-				</div>
+				<h3>Registrar Asistencia de Hoy</h3>
+				<table id="asistencia-table" style="width:100%;max-width:500px;">
+					<thead>
+						<tr>
+							<th>Nombre</th>
+							<th>Registro</th>
+							<th>Asistió</th>
+						</tr>
+					</thead>
+					<tbody></tbody>
+				</table>
 				<button type="submit">Guardar Asistencia</button>
 			</form>
 			<form id="notas-form" style="margin-top:2em;">
@@ -47,7 +45,7 @@
 			<button onclick="cerrarEstudiantes()">Cerrar</button>
 		</div>
 		<div id="mensaje"></div>
-		<div id="debug" style="margin-top:2em; color:#444; font-size:0.98em;"></div>
+	<!-- <div id="debug" style="margin-top:2em; color:#444; font-size:0.98em;"></div> -->
 	</div>
 	<script>
 	// URL de la API en Hostinger
@@ -61,12 +59,14 @@
 
 	// 2. Consultar materias asignadas
 	let materiasDocente = [];
-	const debugDiv = document.getElementById("debug");
-	debugDiv.innerHTML = `<b>Email usado:</b> ${docenteEmail}`;
+	// Leer id_docente de localStorage al cargar la página
+	let docenteId = localStorage.getItem("docente_id") || '';
+	// const debugDiv = document.getElementById("debug");
+	// debugDiv.innerHTML = `<b>Email usado:</b> ${docenteEmail}<br><b>id_docente localStorage:</b> ${docenteId}`;
 	fetch(API_BASE + "get_materias_docente.php?email=" + encodeURIComponent(docenteEmail))
 		.then(async r => {
 			const text = await r.text();
-			debugDiv.innerHTML += `<br><b>Respuesta cruda API:</b><br><pre style='background:#f4f4f4;padding:8px;border-radius:6px;'>${text.replace(/</g,'&lt;')}</pre>`;
+			// debugDiv.innerHTML += `<br><b>Respuesta cruda API:</b><br><pre style='background:#f4f4f4;padding:8px;border-radius:6px;'>${text.replace(/</g,'&lt;')}</pre>`;
 			let data;
 			try { data = JSON.parse(text); } catch { data = {}; }
 			const ul = document.getElementById("materias-list");
@@ -78,11 +78,15 @@
 			document.getElementById("docente-nombre").textContent = `Bienvenido, ${data.docente.nombre} ${data.docente.apellido}`;
 			ul.innerHTML = "";
 			materiasDocente = data.materias;
-			// Guardar id_Docente en localStorage para uso en envíos de notas
-			if (data.materias.length > 0 && data.materias[0].id_docente) {
-				localStorage.setItem("docente_id", data.materias[0].id_docente);
-			} else if (data.docente && data.docente.id_docente) {
-				localStorage.setItem("docente_id", data.docente.id_docente);
+			// Si el id_docente no estaba en localStorage, lo asignamos ahora
+			if (!docenteId) {
+				if (data.materias.length > 0 && data.materias[0].id_docente) {
+					docenteId = data.materias[0].id_docente;
+					localStorage.setItem("docente_id", docenteId);
+				} else if (data.docente && data.docente.id_docente) {
+					docenteId = data.docente.id_docente;
+					localStorage.setItem("docente_id", docenteId);
+				}
 			}
 			data.materias.forEach((m, idx) => {
 				const li = document.createElement("li");
@@ -106,8 +110,17 @@
 		document.getElementById("materias-list").style.display = "none";
 		document.getElementById("estudiantes-section").style.display = "block";
 		document.getElementById("materia-titulo").textContent = `Estudiantes de ${materia.nombre} (${materia.codigo})`;
-		document.getElementById("id_Oferta_Materia_asistencia").value = materia.id_Oferta_Materia;
-		document.getElementById("id_Oferta_Materia_nota").value = materia.id_Oferta_Materia;
+		// Detectar el nombre correcto del campo id de la materia
+		let idOferta = materia.id_Oferta_Materia || materia.id_oferta_materia || materia.idOfertaMateria || '';
+		const inputAsistencia = document.getElementById("id_Oferta_Materia_asistencia");
+		const inputNota = document.getElementById("id_Oferta_Materia_nota");
+		if (idOferta) {
+			if (inputAsistencia) inputAsistencia.value = idOferta;
+			if (inputNota) inputNota.value = idOferta;
+		} else {
+			if (inputAsistencia) inputAsistencia.value = '';
+			if (inputNota) inputNota.value = '';
+		}
 		if (materia.estudiantes && materia.estudiantes.length > 0) {
 			renderAsistencia(materia.estudiantes);
 			renderNotas(materia.estudiantes);
@@ -130,36 +143,20 @@
 	// Genera planilla de asistencia para 30 días (puedes ajustar fechas dinámicamente)
 	function renderAsistencia(estudiantes) {
 		const tbody = document.querySelector("#asistencia-table tbody");
-		const thead = document.querySelector("#asistencia-table thead tr");
 		tbody.innerHTML = "";
-		// Generar cabecera de días (1 al 30)
-		let days = 30;
-		let startDate = new Date();
-		startDate.setDate(1); // Primer día del mes actual
-		thead.innerHTML = `<th>Nombre</th><th>Registro</th>`;
-		for (let d = 0; d < days; d++) {
-			let day = new Date(startDate);
-			day.setDate(startDate.getDate() + d);
-			let label = day.toISOString().slice(5, 10); // MM-DD
-			thead.innerHTML += `<th>${label}<br>Obs.</th>`;
-		}
 		if (!estudiantes || estudiantes.length === 0) {
-			tbody.innerHTML = `<tr><td colspan='${days*2+2}'>No hay estudiantes inscritos.</td></tr>`;
+			tbody.innerHTML = `<tr><td colspan='3'>No hay estudiantes inscritos.</td></tr>`;
 		} else {
 			estudiantes.forEach(e => {
-				let tr = `<td>${e.nombre} ${e.apellido}</td><td>${e.nro_registro}</td>`;
-				for (let d = 0; d < days; d++) {
-					let day = new Date(startDate);
-					day.setDate(startDate.getDate() + d);
-					let fecha = day.toISOString().slice(0, 10);
-							tr += `<td style='min-width:60px;'>
-								<select name="asistencia_${e.id_Estudiante}_${fecha}"><option value="Asistió">✔</option><option value="Faltó">✘</option></select>
-								<input type="hidden" name="id_Estudiante_${e.id_Estudiante}_${fecha}" value="${e.id_Estudiante}">
-								<input type="hidden" name="id_Oferta_Materia_${e.id_Estudiante}_${fecha}" value="${document.getElementById('id_Oferta_Materia_asistencia').value}">
-								<input type="hidden" name="fecha_${e.id_Estudiante}_${fecha}" value="${fecha}">
-							</td>`;
-				}
-				tbody.innerHTML += `<tr>${tr}</tr>`;
+				tbody.innerHTML += `
+					<tr>
+						<td>${e.nombre} ${e.apellido}</td>
+						<td>${e.nro_registro}</td>
+						<td style="text-align:center;">
+						<input type="checkbox" name="asistencia" value="${e.id_Estudiante || e.id_estudiante || e.id || ''}">
+						</td>
+					</tr>
+				`;
 			});
 		}
 	}
@@ -175,7 +172,7 @@
 						<tr>
 							<td>${e.nombre} ${e.apellido}</td>
 							<td>${e.nro_registro}</td>
-							<td><input type="number" name="nota_${e.id_Estudiante}" min="0" max="100"></td>
+							<td><input type="number" name="nota_${e.id_Estudiante}" style="width:60px;" min="0" max="100" step="1"></td>
 						</tr>
 					`;
 				});
@@ -195,67 +192,99 @@
 		e.preventDefault();
 		const form = e.target;
 		let errores = 0;
-		// Recorrer todos los selects de asistencia
-			const selects = form.querySelectorAll("select[name^='asistencia_']");
-			selects.forEach(sel => {
-				const [_, id_Estudiante, fecha] = sel.name.split('_');
-				const id_Oferta_Materia = form.querySelector(`input[name='id_Oferta_Materia_${id_Estudiante}_${fecha}']`).value;
-				const payload = {
-					id_Estudiante,
-					id_Oferta_Materia,
-					fecha
-				};
-				fetch(API_BASE + "asignar_asistencia.php", {
-					method: "POST",
-					headers: { "Content-Type": "application/json" },
-					body: JSON.stringify(payload)
-				})
-				.then(r => r.json())
-				.then(resp => { if (!resp.ok) errores++; })
-				.catch(() => { errores++; });
+		const checkboxes = form.querySelectorAll("input[type='checkbox'][name='asistencia']:checked");
+		const id_Oferta_Materia = document.getElementById("id_Oferta_Materia_asistencia").value;
+		// Fecha local YYYY-MM-DD (sin hora, evita desfases por UTC)
+		const now = new Date();
+		const hoy = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+		let enviados = 0;
+		let debugLog = '';
+		if (form.querySelectorAll("input[type='checkbox'][name='asistencia']").length === 0) {
+			document.getElementById("mensaje").innerHTML = '<div style="color:red">No hay estudiantes para registrar asistencia.</div>';
+			return;
+		}
+		checkboxes.forEach(cb => {
+			const id_Estudiante = cb.value;
+			const payload = {
+				id_Estudiante,
+				id_Oferta_Materia,
+				fecha: hoy
+			};
+			debugLog += `<pre style='background:#f4f4f4;padding:6px;border-radius:5px;'>Payload enviado: ${JSON.stringify(payload, null, 2)}</pre>`;
+			fetch(API_BASE + "asignar_asistencia.php", {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify(payload)
+			})
+			.then(async r => {
+				// Manejo robusto: algunos servidores devuelven cuerpo vacío o texto simple
+				const statusOk = r.ok;
+				const status = r.status;
+				const statusText = r.statusText;
+				const text = await r.text();
+				let resp;
+				try {
+					resp = text ? JSON.parse(text) : { ok: statusOk };
+				} catch (e) {
+					const t = (text || '').trim().toLowerCase();
+					const looksOk = statusOk || t === 'ok' || t === '1' || t === 'true' || t === 'success';
+					resp = { ok: looksOk, raw: text };
+				}
+				debugLog += `<pre style='background:#f4f4f4;padding:6px;border-radius:5px;'>URL: ${API_BASE + 'asignar_asistencia.php'}\nHTTP: ${status} ${statusText}\nRespuesta cruda: ${text ? text.replace(/</g,'&lt;') : '(vacía)'}\nInterpretado: ${JSON.stringify(resp, null, 2)}</pre>`;
+				// Tratar duplicados como idempotente (ya registrada)
+				if (!resp.ok) {
+					const dup = (resp && resp.error === 'PROC_ASISTENCIA' && /duplicate entry/i.test(resp.msg || ''));
+					if (!dup) errores++;
+				}
+				enviados++;
+				if (enviados === checkboxes.length) {
+					mostrarMensajeAsistencia(errores);
+					document.getElementById("mensaje").innerHTML += debugLog;
+				}
+			})
+			.catch(err => {
+				debugLog += `<pre style='background:#f4f4f4;padding:6px;border-radius:5px;'>Error: ${err}</pre>`;
+				errores++;
+				enviados++;
+				if (enviados === checkboxes.length) {
+					mostrarMensajeAsistencia(errores);
+					document.getElementById("mensaje").innerHTML += debugLog;
+				}
 			});
-		setTimeout(() => {
-			if (errores === 0) {
-				document.getElementById("mensaje").innerHTML = '<div style="color:green">Asistencia guardada correctamente.</div>';
-			} else {
-				document.getElementById("mensaje").innerHTML = '<div style="color:red">Error al guardar algunas asistencias.</div>';
-			}
-		}, 1200);
+		});
+		// Si nadie fue marcado como presente
+		if (checkboxes.length === 0) {
+			document.getElementById("mensaje").innerHTML = '<div style="color:orange">No se marcó asistencia para ningún estudiante.</div>';
+		}
 	});
+
+	function mostrarMensajeAsistencia(errores) {
+		if (errores === 0) {
+			document.getElementById("mensaje").innerHTML = '<div style="color:green">Asistencia guardada correctamente.</div>';
+		} else {
+			document.getElementById("mensaje").innerHTML = '<div style="color:red">Error al guardar algunas asistencias.</div>';
+		}
+	}
 
 	// Guardar notas (formulario separado)
 
 	document.getElementById("notas-form").addEventListener("submit", function(e) {
 		e.preventDefault();
-		const form = e.target;
-		const id_Oferta_Materia = document.getElementById("id_Oferta_Materia_nota").value;
-		let id_Docente = localStorage.getItem("docente_id") || null;
+		const id_Oferta_Materia = document.getElementById("id_Oferta_Materia_nota") ? document.getElementById("id_Oferta_Materia_nota").value : '';
+		const id_Docente = docenteId || '';
+		const rows = document.querySelectorAll("#notas-table tbody tr");
+		let resultados = [];
 		let errores = 0;
-		let vacios = 0;
-		// Recorrer filas de notas
-		const rows = form.querySelectorAll("tbody tr");
 		rows.forEach(row => {
-			const nombre = row.children[0].textContent.trim();
 			const nro_registro = row.children[1].textContent.trim();
-			const inputNota = row.querySelector('input[type="number"]');
-			let notaStr = inputNota.value;
-			let nota = notaStr.trim();
-			// Validar campos requeridos (nota puede ser 0, pero no vacío ni texto)
-			if (!nro_registro || !id_Oferta_Materia || nota === '' || isNaN(Number(nota)) || !id_Docente) {
-				vacios++;
-				inputNota.style.background = '#ffd6d6';
-				return;
-			}
-			// Si es número válido, limpiar fondo
-			inputNota.style.background = '';
-			nota = Number(nota);
+			let nota = row.querySelector('input').value;
+			nota = nota !== '' ? Number(nota) : '';
 			const payload = {
 				nro_registro,
 				id_Oferta_Materia,
 				valor: nota,
 				id_Docente
 			};
-			console.log('Enviando nota:', payload);
 			fetch(API_BASE + "asignar_nota.php", {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
@@ -263,20 +292,24 @@
 			})
 			.then(async r => {
 				const resp = await r.json();
-				console.log('Respuesta asignar_nota.php:', resp);
+				resultados.push({nro_registro, resp});
 				if (!resp.ok) errores++;
+				if (resultados.length === rows.length) {
+					if (errores === 0) {
+						document.getElementById("mensaje").innerHTML = '<div style="color:green">Notas guardadas correctamente.</div>';
+					} else {
+						document.getElementById("mensaje").innerHTML = '<div style="color:red">Error al guardar algunas notas.</div>';
+					}
+				}
 			})
-			.catch((err) => { console.error('Error fetch nota:', err); errores++; });
+			.catch(() => {
+				resultados.push({nro_registro, resp: 'error'});
+				errores++;
+				if (resultados.length === rows.length) {
+					document.getElementById("mensaje").innerHTML = '<div style="color:red">Error al guardar algunas notas.</div>';
+				}
+			});
 		});
-		setTimeout(() => {
-			if (vacios > 0) {
-				document.getElementById("mensaje").innerHTML = '<div style="color:orange">Algunas filas no se enviaron porque faltan datos obligatorios.</div>';
-			} else if (errores === 0) {
-				document.getElementById("mensaje").innerHTML = '<div style="color:green">Notas guardadas correctamente.</div>';
-			} else {
-				document.getElementById("mensaje").innerHTML = '<div style="color:red">Error al guardar algunas notas.</div>';
-			}
-		}, 1200);
 	});
 	</script>
 </body>

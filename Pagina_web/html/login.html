@@ -198,11 +198,14 @@
 
         if (resp.ok && data.ok) {
           if (currentRole === "DOCENTE") {
-            // Guardar email, nombre y apellido del docente en localStorage
+            // Guardar email, nombre, apellido e id_docente del docente en localStorage
             if (data.docente) {
               localStorage.setItem("docente_email", data.docente.email);
               localStorage.setItem("docente_nombre", data.docente.nombre);
               localStorage.setItem("docente_apellido", data.docente.apellido);
+              if (data.docente.id_docente) {
+                localStorage.setItem("docente_id", data.docente.id_docente);
+              }
             } else {
               // fallback: solo email
               localStorage.setItem("docente_email", usuario);
