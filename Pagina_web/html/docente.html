@@ -7,7 +7,10 @@
 </head>
 <body>
 	<div class="container">
-		<h1 id="docente-nombre">Bienvenido, Docente</h1>
+		<div style="display:flex;justify-content:space-between;align-items:center;gap:1rem;">
+			<h1 id="docente-nombre" style="margin:0;">Bienvenido, Docente</h1>
+			<button id="logout-btn" type="button" style="padding:8px 12px;border:1px solid #ccc;border-radius:6px;background:#f7f7f7;cursor:pointer;">Cerrar sesión</button>
+		</div>
 		<h2>Materias Asignadas</h2>
 		<ul id="materias-list"></ul>
 		<div id="estudiantes-section" style="display:none;">
@@ -55,6 +58,20 @@
 	const docenteEmail = localStorage.getItem("docente_email");
 	if (!docenteEmail) {
 		window.location.href = "login.html";
+	}
+
+	// Cerrar sesión: limpiar datos del docente y volver al login
+	const logoutBtn = document.getElementById("logout-btn");
+	if (logoutBtn) {
+		logoutBtn.addEventListener("click", () => {
+			try {
+				localStorage.removeItem("docente_email");
+				localStorage.removeItem("docente_nombre");
+				localStorage.removeItem("docente_apellido");
+				localStorage.removeItem("docente_id");
+			} catch (e) { /* ignore */ }
+			window.location.href = "login.html";
+		});
 	}
 
 	// 2. Consultar materias asignadas
@@ -124,6 +141,8 @@
 		if (materia.estudiantes && materia.estudiantes.length > 0) {
 			renderAsistencia(materia.estudiantes);
 			renderNotas(materia.estudiantes);
+			// Precargar notas actuales para esta oferta
+			prefetchNotas(idOferta, materia.estudiantes);
 		} else {
 			fetch(API_BASE + "get_materias_docente.php?email=" + encodeURIComponent(docenteEmail))
 				.then(r => r.json())
@@ -131,6 +150,7 @@
 					if (data.ok && data.materias[idx] && data.materias[idx].estudiantes) {
 						renderAsistencia(data.materias[idx].estudiantes);
 						renderNotas(data.materias[idx].estudiantes);
+						prefetchNotas(idOferta, data.materias[idx].estudiantes);
 					} else {
 						renderAsistencia([]);
 						renderNotas([]);
@@ -168,11 +188,23 @@
 				tbody.innerHTML = `<tr><td colspan='3'>No hay estudiantes inscritos.</td></tr>`;
 			} else {
 				estudiantes.forEach(e => {
+					// Creamos input con data attrs para poder precargar y corregir
+					const safeReg = String(e.nro_registro || '').replace(/[^\w-]/g,'_');
 					tbody.innerHTML += `
 						<tr>
 							<td>${e.nombre} ${e.apellido}</td>
 							<td>${e.nro_registro}</td>
-							<td><input type="number" name="nota_${e.id_Estudiante}" style="width:60px;" min="0" max="100" step="1"></td>
+							<td>
+								<input
+									id="nota_${safeReg}"
+									data-nro-registro="${e.nro_registro}"
+									data-id-estudiante="${e.id_Estudiante || ''}"
+									data-id-nota-parcial=""
+									data-valor-actual=""
+									type="number" name="nota_${e.id_Estudiante}"
+									style="width:60px;" min="0" max="100" step="1"
+								>
+							</td>
 						</tr>
 					`;
 				});
@@ -185,6 +217,52 @@
 		document.getElementById("mensaje").innerHTML = "";
 	}
 
+
+	// Utilidad: precargar notas actuales por oferta y estudiante
+	async function prefetchNotas(idOferta, estudiantes) {
+		if (!idOferta || !estudiantes || estudiantes.length === 0) return;
+		const requests = estudiantes.map(async (e) => {
+			const reg = e.nro_registro;
+			if (!reg) return;
+			try {
+				const r = await fetch(API_BASE + "notas_estudiante.php?nro_registro=" + encodeURIComponent(reg));
+				const text = await r.text();
+				let data; try { data = JSON.parse(text); } catch { data = null; }
+				if (!data || !data.ok || !data.semestres) return;
+				// Buscar notas de esta oferta
+				let idNota = null; let valor = null;
+				for (const sem of data.semestres) {
+					for (const mat of (sem.materias || [])) {
+						for (const ofe of (mat.ofertas || [])) {
+							if (Number(ofe.id_oferta_materia) === Number(idOferta)) {
+								const notas = ofe.notas || [];
+								if (notas.length > 0) {
+									const last = notas[notas.length - 1];
+									idNota = last.id_nota_parcial || null;
+									valor = (last.valor_final !== null && last.valor_final !== undefined) ? last.valor_final : last.valor_original;
+								}
+							}
+						}
+					}
+				}
+				// Actualizar UI si encontramos
+				const safeId = 'nota_' + String(reg).replace(/[^\w-]/g,'_');
+				const input = document.getElementById(safeId);
+				if (input) {
+					if (valor !== null && valor !== undefined) {
+						input.value = valor;
+						input.setAttribute('data-valor-actual', String(valor));
+					}
+					if (idNota) {
+						input.setAttribute('data-id-nota-parcial', String(idNota));
+					}
+				}
+			} catch (e) {
+				// Ignorar errores por alumno individual
+			}
+		});
+		await Promise.allSettled(requests);
+	}
 
 	// Guardar asistencia (planilla)
 
@@ -210,7 +288,6 @@
 				id_Oferta_Materia,
 				fecha: hoy
 			};
-			debugLog += `<pre style='background:#f4f4f4;padding:6px;border-radius:5px;'>Payload enviado: ${JSON.stringify(payload, null, 2)}</pre>`;
 			fetch(API_BASE + "asignar_asistencia.php", {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
@@ -239,7 +316,6 @@
 				enviados++;
 				if (enviados === checkboxes.length) {
 					mostrarMensajeAsistencia(errores);
-					document.getElementById("mensaje").innerHTML += debugLog;
 				}
 			})
 			.catch(err => {
@@ -248,7 +324,6 @@
 				enviados++;
 				if (enviados === checkboxes.length) {
 					mostrarMensajeAsistencia(errores);
-					document.getElementById("mensaje").innerHTML += debugLog;
 				}
 			});
 		});
@@ -275,41 +350,103 @@
 		const rows = document.querySelectorAll("#notas-table tbody tr");
 		let resultados = [];
 		let errores = 0;
-		rows.forEach(row => {
-			const nro_registro = row.children[1].textContent.trim();
-			let nota = row.querySelector('input').value;
-			nota = nota !== '' ? Number(nota) : '';
-			const payload = {
-				nro_registro,
-				id_Oferta_Materia,
-				valor: nota,
-				id_Docente
-			};
-			fetch(API_BASE + "asignar_nota.php", {
-				method: "POST",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify(payload)
-			})
-			.then(async r => {
-				const resp = await r.json();
-				resultados.push({nro_registro, resp});
-				if (!resp.ok) errores++;
-				if (resultados.length === rows.length) {
-					if (errores === 0) {
-						document.getElementById("mensaje").innerHTML = '<div style="color:green">Notas guardadas correctamente.</div>';
-					} else {
-						document.getElementById("mensaje").innerHTML = '<div style="color:red">Error al guardar algunas notas.</div>';
-					}
-				}
-			})
-			.catch(() => {
-				resultados.push({nro_registro, resp: 'error'});
-				errores++;
-				if (resultados.length === rows.length) {
+		let debugLog = '';
+
+		const done = () => {
+			if (resultados.length === rows.length) {
+				if (errores === 0) {
+					document.getElementById("mensaje").innerHTML = '<div style="color:green">Notas guardadas correctamente.</div>';
+				} else {
 					document.getElementById("mensaje").innerHTML = '<div style="color:red">Error al guardar algunas notas.</div>';
 				}
-			});
+			}
+		};
+
+		rows.forEach(row => {
+			const input = row.querySelector('input');
+			const nro_registro = row.children[1].textContent.trim();
+			const idNotaParcial = input.getAttribute('data-id-nota-parcial');
+			const valorActualStr = input.getAttribute('data-valor-actual');
+			const valorActual = (valorActualStr !== null && valorActualStr !== '') ? Number(valorActualStr) : null;
+			let nota = input.value;
+			nota = nota !== '' ? Number(nota) : '';
+
+			// Si no hay cambio y ya existe nota, contar como OK sin llamar API
+			if (idNotaParcial && nota !== '' && valorActual !== null && Number(nota) === Number(valorActual)) {
+				const localMsg = { ok:true, msg:'sin cambios' };
+				resultados.push({ nro_registro, resp: localMsg });
+				return done();
+			}
+
+			// Si hay idNotaParcial => corregir; si no hay y hay valor => insertar
+			if (idNotaParcial && nota !== '') {
+				const payload = { id_Nota_Parcial: Number(idNotaParcial), valor_nuevo: Number(nota), motivo: '' };
+				const url = API_BASE + "corregir_nota.php";
+				console.log('Corrección nota ->', url, payload);
+				fetch(API_BASE + "corregir_nota.php", {
+					method: "POST",
+					headers: { "Content-Type": "application/json" },
+					body: JSON.stringify(payload)
+				})
+				.then(async r => {
+					const status = r.status; const statusText = r.statusText;
+					const text = await r.text();
+					let resp; try { resp = text ? JSON.parse(text) : { ok:r.ok }; } catch { resp = { ok:false, raw:text }; }
+					const okFlag = resp.ok || resp.status === 'VALOR_CAMBIADO_CONCURRENTE';
+					resultados.push({nro_registro, resp});
+					if (!okFlag) errores++;
+					else {
+						// Actualizar dataset con nuevo valor
+						input.setAttribute('data-valor-actual', String(nota));
+					}
+					debugLog += `<pre style='background:#f5fff1;padding:6px;border-radius:5px;'>HTTP: ${status} ${statusText}\nRESPUESTA: ${text ? text.replace(/</g,'&lt;') : '(vacía)'}\nPARSE: ${JSON.stringify(resp)}</pre>`;
+					done();
+				})
+				.catch((err) => {
+					resultados.push({nro_registro, resp:'error'});
+					errores++;
+					debugLog += `<pre style='background:#ffecec;padding:6px;border-radius:5px;'>ERROR FETCH corregir: ${String(err)}</pre>`;
+					done();
+				});
+			} else if (!idNotaParcial && nota !== '') {
+				const payload = { nro_registro, id_Oferta_Materia, valor: Number(nota), id_Docente };
+				const url = API_BASE + "asignar_nota.php";
+				debugLog += `<pre style='background:#eef6ff;padding:6px;border-radius:5px;'>ACCION: insertar\nURL: ${url}\nPAYLOAD: ${JSON.stringify(payload)}</pre>`;
+				console.log('Insertar nota ->', url, payload);
+				fetch(API_BASE + "asignar_nota.php", {
+					method: "POST",
+					headers: { "Content-Type": "application/json" },
+					body: JSON.stringify(payload)
+				})
+				.then(async r => {
+					const status = r.status; const statusText = r.statusText;
+					const text = await r.text();
+					let resp; try { resp = text ? JSON.parse(text) : { ok:r.ok }; } catch { resp = { ok:false, raw:text }; }
+					resultados.push({nro_registro, resp});
+					if (!resp.ok) errores++;
+					else {
+						if (resp.id_nota) input.setAttribute('data-id-nota-parcial', String(resp.id_nota));
+						input.setAttribute('data-valor-actual', String(nota));
+					}
+					debugLog += `<pre style='background:#f5fff1;padding:6px;border-radius:5px;'>HTTP: ${status} ${statusText}\nRESPUESTA: ${text ? text.replace(/</g,'&lt;') : '(vacía)'}\nPARSE: ${JSON.stringify(resp)}</pre>`;
+					done();
+				})
+				.catch((err) => {
+					resultados.push({nro_registro, resp:'error'});
+					errores++;
+					debugLog += `<pre style='background:#ffecec;padding:6px;border-radius:5px;'>ERROR FETCH insertar: ${String(err)}</pre>`;
+					done();
+				});
+			} else {
+				// Sin valor ingresado: no hacemos nada
+				const localMsg = {ok:true, msg:'sin valor'};
+				resultados.push({nro_registro, resp:localMsg});
+				debugLog += `<pre style='background:#f4f4f4;padding:6px;border-radius:5px;'>ACCION: sin valor\nREGISTRO: ${nro_registro}</pre>`;
+				done();
+			}
 		});
+		return;
+
 	});
 	</script>
 </body>
