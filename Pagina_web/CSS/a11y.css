@@ -1,0 +1,4 @@
+/* Minimal a11y helpers (placeholder to evitar 404) */
+.sr-only { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
+.focus-ring:focus { outline:3px solid #1e3a8a; outline-offset:2px; }
+

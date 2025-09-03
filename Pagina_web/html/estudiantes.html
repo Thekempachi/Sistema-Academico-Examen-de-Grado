@@ -10,7 +10,7 @@
   <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 
-  <link rel="stylesheet" href="CSS/a11y.css">
+  <link rel="stylesheet" href="/Pagina_web/CSS/a11y.css">
 </head>
 <body>
   
@@ -145,6 +145,19 @@
     <script src="../JS/script_pensum_estudiante.js" defer></script>
     <script src="../JS/script_notas_estudiante.js" defer></script>
     <script src="../JS/cerrar_sesion.js" defer></script>
+
+    <!-- Config e integración del Chatbot de Estudiantes -->
+    <script>
+      // Ajusta estas instrucciones para personalizar el comportamiento del asistente.
+      // También puedes cambiarlas en tiempo real desde consola: setChatInstructions("...")
+      window.CHAT_INSTRUCCIONES = `
+      - Atiende a estudiantes de la universidad.
+      - Prioriza dudas sobre materias, notas, pensum, inscripciones, calendarios, requisitos y trámites.
+      - Si necesitas datos (carrera, semestre, materia, periodo), pídelos de forma clara.
+      - Si no tienes certeza de una política, sugiere verificar en el portal del estudiante o secretaría.
+      `;
+    </script>
+    <script src="../JS/chat_estudiantes.js" defer></script>
 
 </body>
 </html>

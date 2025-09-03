@@ -1,0 +1,139 @@
+<?php
+// Pagina_web/php/chat_estudiante.php
+// Endpoint para el chatbot de estudiantes que usa la API de OpenAI
+
+header('Content-Type: application/json; charset=utf-8');
+
+// Solo permitir POST
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    http_response_code(405);
+    echo json_encode(['error' => 'Método no permitido']);
+    exit;
+}
+
+// Obtener API Key desde variable de entorno por seguridad
+$apiKey = getenv('OPENAI_API_KEY');
+if (!$apiKey) {
+    http_response_code(500);
+    echo json_encode([
+        'error' => 'Falta la clave de API. Define la variable de entorno OPENAI_API_KEY en el servidor.'
+    ]);
+    exit;
+}
+
+// Leer body JSON
+$raw = file_get_contents('php://input');
+$data = json_decode($raw, true);
+if (!is_array($data)) {
+    http_response_code(400);
+    echo json_encode(['error' => 'Cuerpo de la solicitud inválido']);
+    exit;
+}
+
+$userMessage  = isset($data['message']) ? trim((string)$data['message']) : '';
+$historyInput = isset($data['history']) && is_array($data['history']) ? $data['history'] : [];
+$instructions = isset($data['instructions']) ? trim((string)$data['instructions']) : '';
+
+if ($userMessage === '') {
+    http_response_code(400);
+    echo json_encode(['error' => 'Mensaje vacío']);
+    exit;
+}
+
+// Prompt por defecto (puedes ajustar el tono y el alcance)
+$defaultSystem = <<<EOT
+Eres el Asistente Virtual Académico de la Universidad. Atiendes exclusivamente a estudiantes.
+
+Reglas:
+- Responde SIEMPRE en español, claro y respetuoso.
+- Sé breve pero preciso. Lista pasos cuando sea útil.
+- Si la pregunta no es del ámbito universitario (materias, notas, inscripciones, calendarios, trámites, contacto, horarios, requisitos), indícalo y ofrece derivar a soporte.
+- Si te piden datos personales o cambios en el sistema, explica que no tienes acceso directo y guía el proceso.
+- Si no tienes información suficiente, solicita los datos necesarios (carrera, semestre, materia, periodo, etc.).
+
+Límites:
+- No inventes datos. Si no conoces una política, di que no cuentas con ella y sugiere consultar la secretaría o el portal oficial.
+- No des consejos legales/financieros.
+EOT;
+
+if ($instructions !== '') {
+    $defaultSystem .= "\n\nInstrucciones administrativas adicionales:\n" . $instructions;
+}
+
+// Sanitizar y compactar el historial recibido (opcional desde el cliente)
+$messages = [ [ 'role' => 'system', 'content' => $defaultSystem ] ];
+
+if (!empty($historyInput)) {
+    foreach ($historyInput as $m) {
+        if (!is_array($m)) continue;
+        $role = isset($m['role']) ? (string)$m['role'] : '';
+        $content = isset($m['content']) ? (string)$m['content'] : '';
+        if ($role !== 'user' && $role !== 'assistant' && $role !== 'system') continue;
+        if ($content === '') continue;
+        // Evitar que el cliente inyecte system messages adicionales
+        if ($role === 'system') continue;
+        $messages[] = [ 'role' => $role, 'content' => $content ];
+    }
+}
+
+// Agregar el mensaje actual del usuario
+$messages[] = [ 'role' => 'user', 'content' => $userMessage ];
+
+// Limitar longitud del contexto (mantener los últimos N mensajes relevantes)
+// Conservamos el primer system y hasta 12 interacciones previas
+$maxPairs = 12; // 12 mensajes previos como máximo
+$filtered = [ $messages[0] ];
+$tail = array_slice($messages, -($maxPairs + 1)); // +1 por el user actual
+foreach ($tail as $idx => $m) {
+    if ($idx === 0) continue; // ya agregamos el system
+    $filtered[] = $m;
+}
+$messages = $filtered;
+
+// Preparar payload para Chat Completions
+$payload = [
+    'model' => 'gpt-4o-mini',
+    'messages' => $messages,
+    'temperature' => 0.2,
+];
+
+$ch = curl_init('https://api.openai.com/v1/chat/completions');
+curl_setopt($ch, CURLOPT_HTTPHEADER, [
+    'Content-Type: application/json',
+    'Authorization: Bearer ' . $apiKey,
+]);
+curl_setopt($ch, CURLOPT_POST, true);
+curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+curl_setopt($ch, CURLOPT_TIMEOUT, 30);
+
+$resp = curl_exec($ch);
+if ($resp === false) {
+    $err = curl_error($ch);
+    curl_close($ch);
+    http_response_code(502);
+    echo json_encode(['error' => 'Error al contactar OpenAI', 'detail' => $err]);
+    exit;
+}
+
+$status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+curl_close($ch);
+
+if ($status < 200 || $status >= 300) {
+    http_response_code(502);
+    echo json_encode(['error' => 'Respuesta no válida de OpenAI', 'status' => $status, 'raw' => $resp]);
+    exit;
+}
+
+$decoded = json_decode($resp, true);
+$reply = '';
+if (isset($decoded['choices'][0]['message']['content'])) {
+    $reply = (string)$decoded['choices'][0]['message']['content'];
+}
+
+echo json_encode([
+    'reply' => $reply,
+]);
+<?php
+
+
