@@ -15,7 +15,7 @@
         <div class="mx-auto w-16 h-16 bg-secondary rounded-full flex items-center justify-center mb-4">
           <svg class="w-8 h-8 text-secondary-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5z"/>
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"/>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01-.665-6.479L12 14z"/>
           </svg>
         </div>
         <h1 class="font-playfair text-3xl font-bold text-foreground">Portal Universitario</h1>
@@ -121,6 +121,11 @@
 
     let currentRole = "ESTUDIANTE";
 
+    // (CAMBIO) Variables para guardar los datos del estudiante
+    let nombre_estudiante = "";
+    let apellido_estudiante = "";
+    let nro_registro_estudiante = "";
+
     function selectRole(role) {
       currentRole = role;
       document.getElementById("role-estudiante").classList.toggle("active", role === "ESTUDIANTE");
@@ -194,6 +199,17 @@
         try { data = JSON.parse(text); } catch { data = { ok:false, error:"RESP_JSON_INVALIDA", raw:text }; }
 
         if (resp.ok && data.ok) {
+          // (CAMBIO) Guardar nombre y apellido si es estudiante
+          if (data.rol === "ESTUDIANTE") {
+            nombre_estudiante  = data.nombre   || "";
+            apellido_estudiante = data.apellido || "";
+
+            sessionStorage.setItem("nombre_estudiante", data.nombre||"");
+            sessionStorage.setItem("apellido_estudiante", data.apellido||"");
+
+            nro_registro_estudiante = usuario;
+            sessionStorage.setItem("nro_registro_estudiante", usuario);
+          }
           window.location.href = data.redirect || DEST[data.rol] || "/";
         } else if (resp.status === 401 || data.error === "CREDENCIALES_INVALIDAS") {
           showAlert("Usuario o contraseña incorrectos.");

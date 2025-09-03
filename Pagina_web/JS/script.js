@@ -1,6 +1,5 @@
 // Initialize the application
 document.addEventListener("DOMContentLoaded", () => {
-  generateCalendar()
   showSection("inicio")
 })
 
@@ -10,23 +9,30 @@ function toggleSidebar() {
   sidebar.classList.toggle("active")
 }
 
-// Show different sections
+// Reemplaza esta función
 function showSection(sectionId) {
-  // Hide all sections
-  const sections = document.querySelectorAll(".content-section")
+  const sections = document.querySelectorAll(".content-section");
   sections.forEach((section) => {
-    section.classList.remove("active")
-  })
+    section.classList.remove("active");
+    section.setAttribute("hidden", "");   // oculta todas
+  });
 
-  // Show selected section
-  const targetSection = document.getElementById(sectionId)
+  const targetSection = document.getElementById(sectionId);
   if (targetSection) {
-    targetSection.classList.add("active")
+    targetSection.classList.add("active");
+    targetSection.removeAttribute("hidden"); // muestra solo la objetivo
   }
 
-  const sidebar = document.getElementById("sidebar")
-  sidebar.classList.remove("active")
+  const sidebar = document.getElementById("sidebar");
+  if (sidebar) sidebar.classList.remove("active");
 }
+
+// Añade esta función
+function navigateTo(hashOrId) {
+  const id = (hashOrId || "").startsWith("#") ? hashOrId.slice(1) : hashOrId;
+  showSection(id);
+}
+
 
 // Logout function
 function logout() {
