@@ -1,32 +1,36 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <title>Portal Universitario - Login</title>
+
+  <!-- Tu hoja de estilos unificada -->
   <link rel="stylesheet" href="/Pagina_web/CSS/styles.css">
+  <!-- Fuentes -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@400;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
   <div class="min-h-screen university-gradient flex items-center justify-center p-4">
     <div class="w-full max-w-md space-y-6">
-      <!-- Header -->
+
+      <!-- Header del login -->
       <div class="text-center space-y-2">
         <div class="mx-auto w-16 h-16 bg-secondary rounded-full flex items-center justify-center mb-4">
-          <svg class="w-8 h-8 text-secondary-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg class="w-8 h-8 text-secondary-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5z"/>
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01-.665-6.479L12 14z"/>
           </svg>
         </div>
-        <h1 class="font-playfair text-3xl font-bold text-foreground">Portal Universitario</h1>
+        <h1 class="font-playfair text-3xl font-bold text-foreground">Universidad Nacional Boliviana</h1>
         <p class="text-muted-foreground">Seleccione su tipo de usuario para continuar</p>
       </div>
 
-      <!-- Role Selection (solo Estudiante / Docente) -->
-      <div class="grid gap-3">
-        <button type="button" onclick="selectRole('ESTUDIANTE')" class="role-selector active" id="role-estudiante">
+      <!-- Selector de Rol -->
+      <div class="grid gap-3" role="group" aria-label="Seleccionar tipo de usuario">
+        <button type="button" class="role-selector active" id="role-estudiante">
           <div class="flex items-center space-x-3">
-            <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5z"/>
             </svg>
             <div>
@@ -36,10 +40,10 @@
           </div>
         </button>
 
-        <button type="button" onclick="selectRole('DOCENTE')" class="role-selector" id="role-docente">
+        <button type="button" class="role-selector" id="role-docente">
           <div class="flex items-center space-x-3">
-            <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+            <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253"/>
             </svg>
             <div>
               <h3 class="font-semibold">Docente</h3>
@@ -49,15 +53,15 @@
         </button>
       </div>
 
-      <!-- Login Form -->
-      <div class="login-card">
+      <!-- Formulario de Login -->
+      <div class="login-card" role="region" aria-labelledby="login-title">
         <div class="card-header">
-          <h2 class="text-2xl font-playfair">Iniciar Sesión</h2>
+          <h2 id="login-title" class="text-2xl font-playfair">Iniciar Sesión</h2>
           <p class="text-muted-foreground">Ingrese sus credenciales como <span id="selected-role-text">estudiante</span></p>
         </div>
 
         <div class="card-content">
-          <form id="loginForm" class="space-y-4">
+          <form id="loginForm" class="space-y-4" novalidate>
             <div class="space-y-2">
               <label for="usuario" id="usuario-label">Nro. de registro</label>
               <input type="text" id="usuario" class="input-focus" placeholder="NR-XXXX" autocomplete="username" required>
@@ -67,8 +71,8 @@
               <label for="password">Contraseña</label>
               <div class="relative">
                 <input type="password" id="password" class="input-focus pr-10" placeholder="Ingrese su contraseña" autocomplete="current-password" required>
-                <button type="button" onclick="togglePassword()" class="password-toggle" aria-label="Mostrar/Ocultar contraseña">
-                  <svg id="eye-icon" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <button type="button" id="password-toggle" class="password-toggle" aria-label="Mostrar u ocultar contraseña">
+                  <svg id="eye-icon" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
                   </svg>
@@ -76,8 +80,8 @@
               </div>
             </div>
 
-            <div id="alert" class="alert error hidden">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div id="alert" class="alert error hidden" role="alert" aria-live="polite">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M12 5a7 7 0 100 14 7 7 0 000-14z"/>
               </svg>
               <span id="alert-text">Mensaje</span>
@@ -85,167 +89,26 @@
 
             <button type="submit" class="btn-primary w-full" id="login-btn">Iniciar Sesión</button>
             <div class="text-center">
-              <button type="button" class="text-sm text-secondary hover-underline" onclick="showForgotPassword()">¿Olvidó su contraseña?</button>
+              <button type="button" class="text-sm text-secondary hover-underline" id="forgot-btn">¿Olvidó su contraseña?</button>
             </div>
           </form>
         </div>
       </div>
 
-      <!-- Demo / accesos directos (sin admin) -->
+      <!-- Cuadro de ayuda -->
       <div class="demo-card">
         <div class="card-content">
-          <h4 class="font-semibold mb-2">Instrucciones:</h4>
+          <h4 class="font-semibold mb-2">Instrucciones</h4>
           <ul class="text-sm text-muted-foreground space-y-1">
             <li><strong>Estudiante:</strong> ingrese su <em>Nro. de registro</em> y contraseña.</li>
             <li><strong>Docente:</strong> ingrese su <em>Correo institucional</em> y contraseña.</li>
           </ul>
-          <div class="mt-4 space-y-2">
-            <h5 class="font-semibold text-sm">Accesos de ejemplo:</h5>
-            <div class="flex gap-2 flex-wrap">
-              <a href="/Pagina_web/html/docente.html" class="btn-secondary text-xs">Dashboard Docente</a>
-              <a href="/Pagina_web/html/estudiantes.html" class="btn-secondary text-xs">Dashboard Estudiante</a>
-            </div>
-          </div>
         </div>
       </div>
 
     </div>
   </div>
 
-  <script>
-    const ENDPOINT = "https://im-ventas-de-computadoras.com/Sistema_Academico/login.php";
-    const DEST = {
-      DOCENTE: "/Pagina_web/html/docente.html",
-      ESTUDIANTE: "/Pagina_web/html/estudiantes.html"
-    };
-
-    let currentRole = "ESTUDIANTE";
-
-    // (CAMBIO) Variables para guardar los datos del estudiante
-    let nombre_estudiante = "";
-    let apellido_estudiante = "";
-    let nro_registro_estudiante = "";
-
-    function selectRole(role) {
-      currentRole = role;
-      document.getElementById("role-estudiante").classList.toggle("active", role === "ESTUDIANTE");
-      document.getElementById("role-docente").classList.toggle("active", role === "DOCENTE");
-
-      const label = document.getElementById("usuario-label");
-      const input = document.getElementById("usuario");
-      const roleText = document.getElementById("selected-role-text");
-
-      if (role === "DOCENTE") {
-        label.textContent = "Correo (email)";
-        input.type = "email";
-        input.placeholder = "docente@universidad.edu";
-        roleText.textContent = "docente";
-      } else {
-        label.textContent = "Nro. de registro";
-        input.type = "text";
-        input.placeholder = "NR-XXXX";
-        roleText.textContent = "estudiante";
-      }
-
-      input.focus();
-      hideAlert();
-    }
-
-    function togglePassword() {
-      const input = document.getElementById("password");
-      const eye = document.getElementById("eye-icon");
-      const isPwd = input.type === "password";
-      input.type = isPwd ? "text" : "password";
-      eye.style.opacity = isPwd ? 0.7 : 1;
-    }
-
-    function showAlert(msg) {
-      const box = document.getElementById("alert");
-      const txt = document.getElementById("alert-text");
-      txt.textContent = msg;
-      box.classList.remove("hidden");
-    }
-    function hideAlert() {
-      document.getElementById("alert").classList.add("hidden");
-    }
-
-    function showForgotPassword() {
-      alert("Contacte a soporte académico para restablecer su contraseña.");
-    }
-
-    document.getElementById("loginForm").addEventListener("submit", async (e) => {
-      e.preventDefault();
-      hideAlert();
-
-      const usuario  = document.getElementById("usuario").value.trim();
-      const password = document.getElementById("password").value;
-
-      if (!usuario || !password) {
-        showAlert("Complete todos los campos.");
-        return;
-      }
-
-      const body = new URLSearchParams({ rol: currentRole, usuario, password });
-
-      try {
-        const resp = await fetch(ENDPOINT, {
-          method: "POST",
-          headers: { "Content-Type": "application/x-www-form-urlencoded" },
-          body
-        });
-
-        const text = await resp.text();
-        let data;
-        try { data = JSON.parse(text); } catch { data = { ok:false, error:"RESP_JSON_INVALIDA", raw:text }; }
-        
-        if (resp.ok && data.ok) {
-          // (CAMBIO) Guardar nombre y apellido si es estudiante
-          if (data.rol === "ESTUDIANTE") {
-            nombre_estudiante  = data.nombre   || "";
-            apellido_estudiante = data.apellido || "";
-
-            sessionStorage.setItem("nombre_estudiante", data.nombre||"");
-            sessionStorage.setItem("apellido_estudiante", data.apellido||"");
-
-            nro_registro_estudiante = usuario;
-            sessionStorage.setItem("nro_registro_estudiante", usuario);
-          }
-
-          // (NUEVO) Guardar datos del docente para el dashboard
-          if (currentRole === "DOCENTE") {
-            // Guardar email, nombre, apellido e id_docente del docente en localStorage
-            if (data.docente) {
-              localStorage.setItem("docente_email", data.docente.email);
-              localStorage.setItem("docente_nombre", data.docente.nombre);
-              localStorage.setItem("docente_apellido", data.docente.apellido);
-              if (data.docente.id_docente) {
-                localStorage.setItem("docente_id", data.docente.id_docente);
-              }
-            } else {
-              // fallback: solo email
-              localStorage.setItem("docente_email", usuario);
-            }
-          }
-
-          window.location.href = data.redirect || DEST[data.rol] || "/";
-        } else if (resp.status === 401 || data.error === "CREDENCIALES_INVALIDAS") {
-          showAlert("Usuario o contraseña incorrectos.");
-        } else if (resp.status === 400 || data.error === "FALTAN_DATOS") {
-          showAlert("Complete todos los campos.");
-        } else if (resp.status === 403) {
-          showAlert("Acceso no permitido para este rol.");
-        } else {
-          showAlert("Error del servidor (" + resp.status + ").");
-          console.error("Respuesta cruda:", text);
-        }
-      } catch (err) {
-        showAlert("Error de conexión (¿CORS/red?).");
-        console.error(err);
-      }
-    });
-
-    // estado inicial
-    selectRole("ESTUDIANTE");
-  </script>
+  <script src="/Pagina_web/JS/login.js" defer></script>
 </body>
 </html>
