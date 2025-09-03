@@ -197,7 +197,7 @@
         const text = await resp.text();
         let data;
         try { data = JSON.parse(text); } catch { data = { ok:false, error:"RESP_JSON_INVALIDA", raw:text }; }
-
+        
         if (resp.ok && data.ok) {
           // (CAMBIO) Guardar nombre y apellido si es estudiante
           if (data.rol === "ESTUDIANTE") {
@@ -210,6 +210,23 @@
             nro_registro_estudiante = usuario;
             sessionStorage.setItem("nro_registro_estudiante", usuario);
           }
+
+          // (NUEVO) Guardar datos del docente para el dashboard
+          if (currentRole === "DOCENTE") {
+            // Guardar email, nombre, apellido e id_docente del docente en localStorage
+            if (data.docente) {
+              localStorage.setItem("docente_email", data.docente.email);
+              localStorage.setItem("docente_nombre", data.docente.nombre);
+              localStorage.setItem("docente_apellido", data.docente.apellido);
+              if (data.docente.id_docente) {
+                localStorage.setItem("docente_id", data.docente.id_docente);
+              }
+            } else {
+              // fallback: solo email
+              localStorage.setItem("docente_email", usuario);
+            }
+          }
+
           window.location.href = data.redirect || DEST[data.rol] || "/";
         } else if (resp.status === 401 || data.error === "CREDENCIALES_INVALIDAS") {
           showAlert("Usuario o contraseña incorrectos.");
