@@ -1,7 +1,6 @@
-// script_pensum_estudiante.js
 (() => {
   // Endpoints privados del módulo
-  const ENDPOINT_PENSUM   = "https://im-ventas-de-computadoras.com/Sistema_Academico/pensum_estudiante.php";
+  const ENDPOINT_PENSUM = "https://im-ventas-de-computadoras.com/Sistema_Academico/pensum_estudiante.php";
   const ENDPOINT_MATERIAS_PENSUM = "https://im-ventas-de-computadoras.com/Sistema_Academico/materias_estudiante.php";
 
   document.addEventListener("DOMContentLoaded", () => {
@@ -9,7 +8,6 @@
     cargarPensumEstudiante();
   });
 
-  /* ========================= UTILIDADES DE ESTADO ========================= */
   function getStore(key) {
     return sessionStorage.getItem(key) || localStorage.getItem(key) || "";
   }
@@ -23,11 +21,16 @@
     return full || "Estudiante";
   }
   function pintarBienvenidaDesdeSession() {
-    const el = document.getElementById("alumno-nombre");
-    if (el) el.textContent = getNombreCompleto();
+    const elNombre = document.getElementById("alumno-nombre");
+    if (elNombre) elNombre.textContent = getNombreCompleto();
+
+    // NUEVO: pintar carrera desde sessionStorage si existe
+    const elCarrera = document.getElementById("alumno-carrera");
+    const carreraGuardada = getStore("alumno_carrera");
+    if (elCarrera && carreraGuardada) elCarrera.textContent = carreraGuardada;
   }
 
-  /* ======================= CARGA Y RENDER DEL PENSUM ====================== */
+
   async function cargarPensumEstudiante() {
     const cont = document.getElementById("pensum-container");
     if (!cont) return;
@@ -59,6 +62,14 @@
         return;
       }
 
+  
+      const carreraNombre = (safe(data, "carrera.nombre") || "").toString().trim();
+      const carreraEl = document.getElementById("alumno-carrera");
+      if (carreraNombre && carreraEl) {
+        carreraEl.textContent = carreraNombre;
+        sessionStorage.setItem("alumno_carrera", carreraNombre);
+      }
+
       const pensum = Array.isArray(data.pensum) ? data.pensum : [];
       if (pensum.length === 0) {
         cont.innerHTML = `<p>No se encontraron materias en el pensum activo de tu plan de estudio.</p>`;
@@ -67,7 +78,7 @@
 
       const grupos = agruparPorSemestre(pensum);
 
-      // (Opcional) inferir semestre actual
+    
       let semestreActual = null;
       try {
         semestreActual = await inferirSemestreActualDesdeMaterias(grupos);
@@ -88,7 +99,6 @@
     }
   }
 
-  /* ============================= LÓGICA AUX =============================== */
   function agruparPorSemestre(pensum) {
     const map = new Map();
     for (const it of pensum) {
@@ -96,7 +106,7 @@
       if (!map.has(s)) map.set(s, []);
       map.get(s).push(it);
     }
-    for (const [k, arr] of map.entries()) {
+    for (const [, arr] of map.entries()) {
       arr.sort((a, b) => (a.sigla || "").localeCompare(b.sigla || "", "es"));
     }
     return new Map([...map.entries()].sort((a, b) => a[0] - b[0]));
@@ -170,7 +180,7 @@
   function toIntSafe(v, fallback) {
     const n = Number.parseInt(v, 10);
     return Number.isFinite(n) ? n : fallback;
-    }
+  }
   function escapeHTML(str) {
     return String(str ?? "").replace(/[&<>"']/g, s => ({
       "&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"

@@ -9,25 +9,23 @@ function toggleSidebar() {
   sidebar.classList.toggle("active")
 }
 
-// Reemplaza esta función
 function showSection(sectionId) {
   const sections = document.querySelectorAll(".content-section");
   sections.forEach((section) => {
     section.classList.remove("active");
-    section.setAttribute("hidden", "");   // oculta todas
+    section.setAttribute("hidden", "");
   });
 
   const targetSection = document.getElementById(sectionId);
   if (targetSection) {
     targetSection.classList.add("active");
-    targetSection.removeAttribute("hidden"); // muestra solo la objetivo
+    targetSection.removeAttribute("hidden");
   }
 
   const sidebar = document.getElementById("sidebar");
   if (sidebar) sidebar.classList.remove("active");
 }
 
-// Añade esta función
 function navigateTo(hashOrId) {
   const id = (hashOrId || "").startsWith("#") ? hashOrId.slice(1) : hashOrId;
   showSection(id);
@@ -38,19 +36,15 @@ function navigateTo(hashOrId) {
 function logout() {
   if (confirm("¿Estás seguro de que deseas cerrar sesión?")) {
     alert("Sesión cerrada exitosamente")
-    // Here you would typically redirect to login page
-    // window.location.href = 'login.html';
   }
 }
 
-// Contact support function
 function contactSupport() {
   alert(
     "Conectando con Soporte para Estudiantes...\n\nPuedes contactarnos por:\n• WhatsApp: +591 70000000\n• Email: soporte@unb.edu.bo\n• Horario: Lunes a Viernes 8:00-18:00",
   )
 }
 
-// Close sidebar when clicking outside (mobile)
 document.addEventListener("click", (event) => {
   const sidebar = document.getElementById("sidebar")
   const menuToggle = document.querySelector(".menu-toggle-btn")
@@ -65,7 +59,6 @@ document.addEventListener("click", (event) => {
   }
 })
 
-// Handle window resize
 window.addEventListener("resize", () => {
   const sidebar = document.getElementById("sidebar")
   if (window.innerWidth > 480) {
@@ -86,13 +79,12 @@ let isLoading = false
 function selectRole(role) {
   selectedRole = role
 
-  // Actualizar UI de selección de rol
+
   document.querySelectorAll(".role-selector").forEach((btn) => {
     btn.classList.remove("active")
   })
   document.getElementById(`role-${role}`).classList.add("active")
 
-  // Actualizar texto del formulario
   const roleTexts = {
     estudiante: "estudiante",
     docente: "docente",
@@ -100,7 +92,6 @@ function selectRole(role) {
   }
   document.getElementById("selected-role-text").textContent = roleTexts[role]
 
-  // Limpiar mensajes
   hideMessage()
 }
 

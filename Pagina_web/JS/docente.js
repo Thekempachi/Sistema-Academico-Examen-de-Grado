@@ -1,4 +1,4 @@
-// URL de la API en Hostinger
+
 	const API_BASE = "https://im-ventas-de-computadoras.com/Sistema_Academico/";
 
 	// 1. Obtener email del docente desde localStorage
@@ -59,8 +59,6 @@
 			});
 		});
 
-	// 3. Ver estudiantes de una materia
-	// Delegación de eventos para los botones "Ver estudiantes"
 	document.getElementById("materias-list").addEventListener("click", function(e) {
 		if (e.target.classList.contains("btn-ver-estudiantes")) {
 			const idx = e.target.getAttribute("data-idx");
@@ -74,7 +72,6 @@
 		document.getElementById("materias-list").style.display = "none";
 		document.getElementById("estudiantes-section").style.display = "block";
 		document.getElementById("materia-titulo").textContent = `Estudiantes de ${materia.nombre} (${materia.codigo})`;
-		// Detectar el nombre correcto del campo id de la materia
 		let idOferta = materia.id_Oferta_Materia || materia.id_oferta_materia || materia.idOfertaMateria || '';
 		const inputAsistencia = document.getElementById("id_Oferta_Materia_asistencia");
 		const inputNota = document.getElementById("id_Oferta_Materia_nota");
@@ -107,7 +104,6 @@
 	}
 
 
-	// Genera planilla de asistencia para 30 días (puedes ajustar fechas dinámicamente)
 	function renderAsistencia(estudiantes) {
 		const tbody = document.querySelector("#asistencia-table tbody");
 		tbody.innerHTML = "";
@@ -135,7 +131,6 @@
 				tbody.innerHTML = `<tr><td colspan='3'>No hay estudiantes inscritos.</td></tr>`;
 			} else {
 				estudiantes.forEach(e => {
-					// Creamos input con data attrs para poder precargar y corregir
 					const safeReg = String(e.nro_registro || '').replace(/[^\w-]/g,'_');
 					tbody.innerHTML += `
 						<tr>
@@ -164,8 +159,6 @@
 		document.getElementById("mensaje").innerHTML = "";
 	}
 
-
-	// Utilidad: precargar notas actuales por oferta y estudiante
 	async function prefetchNotas(idOferta, estudiantes) {
 		if (!idOferta || !estudiantes || estudiantes.length === 0) return;
 		const requests = estudiantes.map(async (e) => {
@@ -241,7 +234,6 @@
 				body: JSON.stringify(payload)
 			})
 			.then(async r => {
-				// Manejo robusto: algunos servidores devuelven cuerpo vacío o texto simple
 				const statusOk = r.ok;
 				const status = r.status;
 				const statusText = r.statusText;
@@ -255,7 +247,7 @@
 					resp = { ok: looksOk, raw: text };
 				}
 				debugLog += `<pre style='background:#f4f4f4;padding:6px;border-radius:5px;'>URL: ${API_BASE + 'asignar_asistencia.php'}\nHTTP: ${status} ${statusText}\nRespuesta cruda: ${text ? text.replace(/</g,'&lt;') : '(vacía)'}\nInterpretado: ${JSON.stringify(resp, null, 2)}</pre>`;
-				// Tratar duplicados como idempotente (ya registrada)
+
 				if (!resp.ok) {
 					const dup = (resp && resp.error === 'PROC_ASISTENCIA' && /duplicate entry/i.test(resp.msg || ''));
 					if (!dup) errores++;
@@ -274,7 +266,6 @@
 				}
 			});
 		});
-		// Si nadie fue marcado como presente
 		if (checkboxes.length === 0) {
 			document.getElementById("mensaje").innerHTML = '<div style="color:orange">No se marcó asistencia para ningún estudiante.</div>';
 		}
@@ -287,8 +278,6 @@
 			document.getElementById("mensaje").innerHTML = '<div style="color:red">Error al guardar algunas asistencias.</div>';
 		}
 	}
-
-	// Guardar notas (formulario separado)
 
 	document.getElementById("notas-form").addEventListener("submit", function(e) {
 		e.preventDefault();
@@ -318,14 +307,12 @@
 			let nota = input.value;
 			nota = nota !== '' ? Number(nota) : '';
 
-			// Si no hay cambio y ya existe nota, contar como OK sin llamar API
 			if (idNotaParcial && nota !== '' && valorActual !== null && Number(nota) === Number(valorActual)) {
 				const localMsg = { ok:true, msg:'sin cambios' };
 				resultados.push({ nro_registro, resp: localMsg });
 				return done();
 			}
 
-			// Si hay idNotaParcial => corregir; si no hay y hay valor => insertar
 			if (idNotaParcial && nota !== '') {
 				const payload = { id_Nota_Parcial: Number(idNotaParcial), valor_nuevo: Number(nota), motivo: '' };
 				const url = API_BASE + "corregir_nota.php";
@@ -343,7 +330,6 @@
 					resultados.push({nro_registro, resp});
 					if (!okFlag) errores++;
 					else {
-						// Actualizar dataset con nuevo valor
 						input.setAttribute('data-valor-actual', String(nota));
 					}
 					debugLog += `<pre style='background:#f5fff1;padding:6px;border-radius:5px;'>HTTP: ${status} ${statusText}\nRESPUESTA: ${text ? text.replace(/</g,'&lt;') : '(vacía)'}\nPARSE: ${JSON.stringify(resp)}</pre>`;
@@ -385,7 +371,6 @@
 					done();
 				});
 			} else {
-				// Sin valor ingresado: no hacemos nada
 				const localMsg = {ok:true, msg:'sin valor'};
 				resultados.push({nro_registro, resp:localMsg});
 				debugLog += `<pre style='background:#f4f4f4;padding:6px;border-radius:5px;'>ACCION: sin valor\nREGISTRO: ${nro_registro}</pre>`;

@@ -21,11 +21,9 @@
   function selectRole(role) {
     currentRole = role;
 
-    // toggle visual
     $("role-estudiante").classList.toggle("active", role === "ESTUDIANTE");
     $("role-docente").classList.toggle("active", role === "DOCENTE");
 
-    // adaptar labels/placeholders
     const label = $("usuario-label");
     const input = $("usuario");
     const roleText = $("selected-role-text");
@@ -80,7 +78,6 @@
       try { data = JSON.parse(text); } catch { data = { ok:false, error:"RESP_JSON_INVALIDA", raw:text }; }
 
       if (resp.ok && data.ok) {
-        // Persistencias por rol
         if (data.rol === "ESTUDIANTE") {
           sessionStorage.setItem("nombre_estudiante", data.nombre || "");
           sessionStorage.setItem("apellido_estudiante", data.apellido || "");
@@ -128,7 +125,6 @@
 
     $("loginForm")?.addEventListener("submit", handleSubmit);
 
-    // Estado inicial
     selectRole("ESTUDIANTE");
   });
 })();

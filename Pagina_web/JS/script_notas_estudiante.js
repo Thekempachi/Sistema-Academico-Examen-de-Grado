@@ -1,4 +1,3 @@
-// script_notas_estudiante.js
 (() => {
   const ENDPOINT_NOTAS = "https://im-ventas-de-computadoras.com/Sistema_Academico/notas_estudiante.php";
 
@@ -6,12 +5,11 @@
     cargarNotasEstudiante();
   });
 
-  /* ========================= ESTADO / SESSION ========================= */
+
   function getNR() {
     return sessionStorage.getItem("nro_registro_estudiante") || "";
   }
 
-  /* ========================= CARGA Y RENDER =========================== */
   async function cargarNotasEstudiante() {
     const cont = document.getElementById("notas-container");
     if (!cont) return;
@@ -44,14 +42,13 @@
       }
 
       const semestres = Array.isArray(data.semestres) ? data.semestres : [];
-      const promedio = data.promedio_final; // entero o null
+      const promedio = data.promedio_final
 
       if (semestres.length === 0) {
         cont.innerHTML = renderPromedioCard(promedio) + `<p>No se encontraron notas registradas.</p>`;
         return;
       }
 
-      // Orden: semestres numéricos de menor a mayor; null (sin mapeo) al final
       semestres.sort((a, b) => {
         const sa = a.semestre_pensum, sb = b.semestre_pensum;
         if (sa == null && sb == null) return 0;
@@ -64,12 +61,12 @@
       let html = "";
       if (semestres.length === 0) {
         html += `<p>No se encontraron notas registradas.</p>`;
-        html += renderPromedioCard(promedio); // promedio al final incluso en este caso
+        html += renderPromedioCard(promedio);
       } else {
         for (const sem of semestres) {
           html += renderSemesterCard(sem);
         }
-        html += renderPromedioCard(promedio); // promedio al final
+        html += renderPromedioCard(promedio)
       }
       cont.innerHTML = html;
 
@@ -99,8 +96,6 @@
       ? "Sin semestre (no mapeado)"
       : `${formatSemestreOrdinal(sem)} Semestre`;
 
-    // Para cada materia, calculamos una única nota:
-    // tomamos la oferta más reciente (id_oferta_materia mayor) y promediamos sus parciales (valor_final)
     const materias = Array.isArray(semData.materias) ? semData.materias.slice() : [];
     materias.sort((a, b) => (a.sigla || "").localeCompare(b.sigla || "", "es"));
 
@@ -124,12 +119,10 @@
     `;
   }
 
-  /* ============================ CÁLCULOS ============================= */
   function calcularNotaMateria(materia) {
     const ofertas = Array.isArray(materia.ofertas) ? materia.ofertas : [];
     if (ofertas.length === 0) return null;
 
-    // Escogemos la oferta más reciente por id_oferta_materia
     let best = ofertas[0];
     for (let i = 1; i < ofertas.length; i++) {
       if ((ofertas[i].id_oferta_materia || 0) > (best.id_oferta_materia || 0)) {
@@ -145,7 +138,7 @@
     if (valores.length === 0) return null;
 
     const suma = valores.reduce((acc, v) => acc + v, 0);
-    return suma / valores.length; // promedio simple de parciales de la última oferta
+    return suma / valores.length;
   }
 
   /* ============================== HELPERS ============================ */

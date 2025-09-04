@@ -1,15 +1,11 @@
-// script_ofertas_estudiante.js
-
-// Endpoint que devuelve las ofertas disponibles para el estudiante
+// Endpoint
 const ENDPOINT_OFERTAS = "https://im-ventas-de-computadoras.com/Sistema_Academico/oferta_estudiante.php";
 
-// Al cargar la página: intenta pintar bienvenida (si existe el nodo) y carga ofertas
 document.addEventListener("DOMContentLoaded", () => {
   pintarBienvenidaDesdeSession();
-  cargarOfertasEstudiante(); // por defecto usa el contenedor #ofertas-materias
+  cargarOfertasEstudiante();
 });
 
-/* ------------------------- UTILIDADES DE ESTADO ------------------------- */
 function getFromStores(key) {
   return sessionStorage.getItem(key) || localStorage.getItem(key) || "";
 }
@@ -25,13 +21,11 @@ function getNombreCompleto() {
   return full || "Estudiante";
 }
 
-/* --------------------------- PINTAR BIENVENIDA -------------------------- */
 function pintarBienvenidaDesdeSession() {
   const el = document.getElementById("alumno-nombre");
   if (el) el.textContent = getNombreCompleto();
 }
 
-/* ------------------------- CARGA / RENDER OFERTAS ----------------------- */
 async function cargarOfertasEstudiante(containerId = "ofertas-materias") {
   const cont = document.getElementById(containerId);
   if (!cont) return;
@@ -78,16 +72,7 @@ async function cargarOfertasEstudiante(containerId = "ofertas-materias") {
   }
 }
 
-/* ------------------------------ RENDER UI ------------------------------- */
 function renderCardOferta(item) {
-  // Estructura esperada del PHP:
-  // {
-  //   id_oferta_materia, grupo, cupos, fecha_creacion,
-  //   materia: { id_materia, sigla },
-  //   aula: { codigo, bloque },
-  //   horario: { hora_inicio, hora_fin },
-  //   docente: { nombre, apellido }
-  // }
 
   const sigla   = safe(item, "materia.sigla") || "Materia";
   const docente = joinNombreApellido(
